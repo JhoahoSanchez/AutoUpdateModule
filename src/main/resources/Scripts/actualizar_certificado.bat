@@ -1,6 +1,6 @@
 @echo off
 
-REM Ruta del nuevo certificado
+REM Ruta del nuevo certificado, modificar en la version final a C:/Sideralsoft/Actualizaciones/Certificados
 set CERT_PATH=D:\Universidad\Tesis\AutoUpdateV1.0.0\AutoUpdateModule_2.0\AutoUpdateModule\src\main\resources\Certificados\server700.crt
 
 REM Alias del certificado que deseas actualizar
