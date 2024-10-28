@@ -1,4 +1,4 @@
-package com.sideralsoft.certificados;
+package com.sideralsoft.certificate;
 
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
