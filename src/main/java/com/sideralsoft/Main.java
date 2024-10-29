@@ -1,8 +1,6 @@
 package com.sideralsoft;
 
-import com.sideralsoft.Config.Scheduler;
-
-import static spark.Spark.get;
+import com.sideralsoft.config.Scheduler;
 
 public class Main {
     public static void main(String[] args) {

@@ -1,4 +1,4 @@
-package com.sideralsoft.Config;
+package com.sideralsoft.config;
 
 import spark.Spark;
 
