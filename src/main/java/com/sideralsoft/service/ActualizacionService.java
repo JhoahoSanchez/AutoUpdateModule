@@ -1,32 +1,56 @@
 package com.sideralsoft.service;
 
-import com.sideralsoft.config.Scheduler;
+import com.sideralsoft.config.ApplicationProperties;
+import com.sideralsoft.utils.ElementosSingleton;
+import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.utils.JsonUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import spark.Spark;
+
+import java.net.URI;
+import java.net.http.HttpClient;
+import java.net.http.HttpRequest;
+import java.net.http.HttpResponse;
+import java.util.List;
 
 public class ActualizacionService {
 
-    //archivo de configuraciones
     private static final Logger LOG = LoggerFactory.getLogger(ActualizacionService.class);
 
-    public void consultarNuevaVersion() {
-
-        //METODO ENCARGADO DE ENVIAR LA INFO DE LAS APPS LOCALES A LA API Y RECIBIR UN JSON CON LA INFO DE LAS APPS DISPONIBLES A ACTUALIZAR
-        //EN CASO DE QUE EL JSON ESTE VACIO, SE LANZA UNA EXCEPCION
+    public List<Elemento> consultarNuevaVersion() {
 
         LOG.debug("Consulter Nueva Version");
+        List<Elemento> elementos = ElementosSingleton.getInstance().obtenerElementos();
 
-//        Spark.get("/prueba", ((request, response) -> {
-//            response.type("application/json");
-//            logger.info("Dentro de la peticion get");
-//            return "{\"message\": \"Hello, Spark!\"}";
-//        }));
+        try (HttpClient client = HttpClient.newHttpClient()) {
 
+            String json = JsonUtils.getMapper().writeValueAsString(elementos);
+
+            HttpRequest request = HttpRequest.newBuilder()
+                    .uri(new URI(ApplicationProperties.getInstance().getProperty("api.url")))
+                    .header("Content-Type", "application/json")
+                    .header("Authorization", ApplicationProperties.getInstance().getProperty("api.token"))
+                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .build();
+
+            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+
+            if (response.statusCode() == 200) {
+                LOG.debug("Nuevas versiones encontradas");
+                List<Elemento> elementosActualizables = JsonUtils.fromJsonToList(response.body(), Elemento.class);
+
+                for (Elemento elemento : elementosActualizables) {
+                    LOG.debug("Elemento a actualizar: {}", elemento);
+                }
+                return elementosActualizables;
+            }
+        } catch (Exception e) {
+            LOG.error("Ha ocurrido un error al consultar el elemento: ", e);
+        }
+        return null;
     }
 
-    private void leerArchivoConfiguraciones(){
+    public void descargarArchivos(List<Elemento> elementosActualizables) {
 
     }
-
 }

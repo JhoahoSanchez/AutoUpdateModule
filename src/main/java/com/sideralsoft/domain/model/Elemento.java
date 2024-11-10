@@ -4,14 +4,15 @@ import com.fasterxml.jackson.annotation.JsonProperty;
 
 public class Elemento {
 
-    @JsonProperty("nombreAplicacion")
+    @JsonProperty("nombre")
     private String nombre;
     @JsonProperty("version")
     private String version;
     @JsonProperty("hash")
     private String hash;
-    @JsonProperty("ubicacion")
-    private String ubicacion;
+    @JsonProperty("ruta")
+    private String ruta;
+    @JsonProperty("tipo")
     private TipoElemento tipo;
 
     public Elemento() {
@@ -41,12 +42,12 @@ public class Elemento {
         this.hash = hash;
     }
 
-    public String getUbicacion() {
-        return ubicacion;
+    public String getRuta() {
+        return ruta;
     }
 
-    public void setUbicacion(String ubicacion) {
-        this.ubicacion = ubicacion;
+    public void setRuta(String ruta) {
+        this.ruta = ruta;
     }
 
     public TipoElemento getTipo() {
@@ -55,5 +56,16 @@ public class Elemento {
 
     public void setTipo(TipoElemento tipo) {
         this.tipo = tipo;
+    }
+
+    @Override
+    public String toString() {
+        return "Elemento{" +
+                "nombre='" + nombre + '\'' +
+                ", version='" + version + '\'' +
+                ", hash='" + hash + '\'' +
+                ", ruta='" + ruta + '\'' +
+                ", tipo=" + tipo +
+                '}';
     }
 }

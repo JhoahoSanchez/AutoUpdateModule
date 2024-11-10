@@ -1,34 +1,41 @@
-package com.sideralsoft.config;
+package com.sideralsoft.service;
 
-import com.sideralsoft.service.ActualizacionService;
+import com.sideralsoft.config.SparkConfig;
+import com.sideralsoft.domain.model.Elemento;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.time.LocalDateTime;
 import java.time.temporal.ChronoUnit;
+import java.util.List;
 import java.util.concurrent.Executors;
 import java.util.concurrent.ScheduledExecutorService;
 import java.util.concurrent.TimeUnit;
 
-public class Scheduler {
+public class SchedulerService {
 
-    private static final Logger LOG = LoggerFactory.getLogger(Scheduler.class);
+    private static final Logger LOG = LoggerFactory.getLogger(SchedulerService.class);
 
     private final ActualizacionService actualizacionService;
     private final ScheduledExecutorService scheduler;
 
-    public Scheduler(){
-        AppConfig.getInstance();
+    public SchedulerService() {
+        SparkConfig.getInstance();
         this.actualizacionService = new ActualizacionService();
         this.scheduler = Executors.newScheduledThreadPool(1);
     }
 
-    public void generarTareaConsulta() {
-        try{
-            this.actualizacionService.consultarNuevaVersion();
-        }catch (Exception e){
+    public void actualizarElementos() {
+        try {
+            List<Elemento> elementosActualizables = actualizacionService.consultarNuevaVersion();
+
+            if (!elementosActualizables.isEmpty()) {
+                actualizacionService.descargarArchivos(elementosActualizables); //TODO: DEBERIA RETORNAR LOS ARCHIVOS
+            }
+
+        } catch (Exception e) {
             LOG.error("Error general al generar la tarea de consulta: ", e);
-        }finally {
+        } finally {
             this.generarNuevaHoraConsulta();
         }
     }
@@ -36,7 +43,7 @@ public class Scheduler {
     private void generarNuevaHoraConsulta() {
         LocalDateTime horaEspecifica = LocalDateTime.now().plusHours((int) ((Math.random() * (10 - 2)) + 2));
         long delay = LocalDateTime.now().until(horaEspecifica, ChronoUnit.SECONDS);
-        scheduler.scheduleAtFixedRate(this::generarTareaConsulta, delay, TimeUnit.HOURS.toSeconds(24), TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::actualizarElementos, delay, TimeUnit.HOURS.toSeconds(24), TimeUnit.SECONDS);
     }
 
     public void detenerScheduler() {

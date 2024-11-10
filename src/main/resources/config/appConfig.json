@@ -1,20 +1,20 @@
 [
   {
-    "nombreAplicacion": "interfaz-hormolab",
+    "nombre": "interfaz-hormolab",
     "version": "1.0.0",
     "hash": "45eae8f94b5b813c1802abd592c838f856b87529",
     "tipo": "APLICACION",
-    "ubicacion": "C:/Sideralsoft/sistemas-externos/hormolab"
+    "ruta": "C:/Sideralsoft/sistemas-externos/hormolab"
   },
   {
-    "nombreAplicacion": "interfaz-hpas",
+    "nombre": "interfaz-hpas",
     "version": "1.2.5",
     "hash": "feaa2b05cc309f3287131de7bf608084247638bf",
     "tipo": "APLICACION",
-    "ubicacion": "C:/Sideralsoft/sistemas-externos/hpas"
+    "ruta": "C:/Sideralsoft/sistemas-externos/hpas"
   },
   {
-    "nombreAplicacion": "certificado-print-server",
+    "nombre": "certificado-print-server",
     "version": "3.4.7",
     "hash": "64431880b6384fae1e33aa0c377cc30e157057c9",
     "tipo": "CERTIFICADO"
