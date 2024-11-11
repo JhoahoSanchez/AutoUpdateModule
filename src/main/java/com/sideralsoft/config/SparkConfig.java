@@ -18,9 +18,9 @@ public class SparkConfig {
     }
 
     private void configureSpark() {
-        int port = Integer.parseInt(ApplicationProperties.getInstance().getProperty("spark.defaultPort"));
+        int port = Integer.parseInt(ApplicationProperties.getProperty("spark.defaultPort"));
         Spark.port(port);
-        int maxThreads = Integer.parseInt(ApplicationProperties.getInstance().getProperty("spark.maxThreads"));
+        int maxThreads = Integer.parseInt(ApplicationProperties.getProperty("spark.maxThreads"));
         Spark.threadPool(maxThreads); //TODO: COMPROBAR
     }
 

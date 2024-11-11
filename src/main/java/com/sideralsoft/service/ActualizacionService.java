@@ -27,9 +27,9 @@ public class ActualizacionService {
             String json = JsonUtils.getMapper().writeValueAsString(elementos);
 
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(ApplicationProperties.getInstance().getProperty("api.url")))
+                    .uri(new URI(ApplicationProperties.getProperty("api.url")))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", ApplicationProperties.getInstance().getProperty("api.token"))
+                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
                     .POST(HttpRequest.BodyPublishers.ofString(json))
                     .build();
 

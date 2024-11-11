@@ -12,7 +12,7 @@ public class ElementosSingleton {
 
     private static ElementosSingleton instance;
     private static final Logger LOG = LoggerFactory.getLogger(ElementosSingleton.class);
-    private static final String rutaArchivo = ApplicationProperties.getInstance().getProperty("app.config.elementos.rutaArchivo");
+    private static final String rutaArchivo = ApplicationProperties.getProperty("app.config.elementos.rutaArchivo");
 
     private ElementosSingleton() {
     }

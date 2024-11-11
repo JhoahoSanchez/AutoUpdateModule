@@ -9,25 +9,13 @@ import java.util.Properties;
 
 public class ApplicationProperties {
 
-    private static ApplicationProperties instance;
     private static final Logger LOG = LoggerFactory.getLogger(ApplicationProperties.class);
 
-    private Properties properties;
+    private static Properties properties;
 
-    private ApplicationProperties() {
-        cargarPropiedades();
-    }
-
-    public static ApplicationProperties getInstance() {
-        if (instance == null) {
-            instance = new ApplicationProperties();
-        }
-        return instance;
-    }
-
-    private void cargarPropiedades() {
+    private static void cargarPropiedades() {
         properties = new Properties();
-        try (InputStream input = getClass().getClassLoader().getResourceAsStream("application.properties")) {
+        try (InputStream input = ApplicationProperties.class.getClassLoader().getResourceAsStream("application.properties")) {
             if (input == null) {
                 LOG.error("No se pudo encontrar el archivo application.properties");
                 return;
@@ -40,7 +28,10 @@ public class ApplicationProperties {
         }
     }
 
-    public String getProperty(String key) {
+    public static String getProperty(String key) {
+        if (properties == null) {
+            ApplicationProperties.cargarPropiedades();
+        }
         return properties.getProperty(key);
     }
 
