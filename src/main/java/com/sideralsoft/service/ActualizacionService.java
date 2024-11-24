@@ -19,34 +19,34 @@ public class ActualizacionService {
 
     public List<Elemento> consultarNuevaVersion() {
 
-        LOG.debug("Consulter Nueva Version");
-        List<Elemento> elementos = ElementosSingleton.getInstance().obtenerElementos();
-
-        try (HttpClient client = HttpClient.newHttpClient()) {
-
-            String json = JsonUtils.getMapper().writeValueAsString(elementos);
-
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(ApplicationProperties.getProperty("api.url")))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() == 200) {
-                LOG.debug("Nuevas versiones encontradas");
-                List<Elemento> elementosActualizables = JsonUtils.fromJsonToList(response.body(), Elemento.class);
-
-                for (Elemento elemento : elementosActualizables) {
-                    LOG.debug("Elemento a actualizar: {}", elemento);
-                }
-                return elementosActualizables;
-            }
-        } catch (Exception e) {
-            LOG.error("Ha ocurrido un error al consultar el elemento: ", e);
-        }
+//        LOG.debug("Consulter Nueva Version");
+//        List<Elemento> elementos = ElementosSingleton.getInstance().obtenerElementos();
+//
+//        try (HttpClient client = HttpClient.newHttpClient()) {
+//
+//            String json = JsonUtils.getMapper().writeValueAsString(elementos);
+//
+//            HttpRequest request = HttpRequest.newBuilder()
+//                    .uri(new URI(ApplicationProperties.getProperty("api.url")))
+//                    .header("Content-Type", "application/json")
+//                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
+//                    .POST(HttpRequest.BodyPublishers.ofString(json))
+//                    .build();
+//
+//            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString()); //TODO: SE DESCARGA DIRECTAMENTE, VERIFICAR
+//
+//            if (response.statusCode() == 200) {
+//                LOG.debug("Nuevas versiones encontradas");
+//                List<Elemento> elementosActualizables = JsonUtils.fromJsonToList(response.body(), Elemento.class);
+//
+//                for (Elemento elemento : elementosActualizables) {
+//                    LOG.debug("Elemento a actualizar: {}", elemento);
+//                }
+//                return elementosActualizables;
+//            }
+//        } catch (Exception e) {
+//            LOG.error("Ha ocurrido un error al consultar el elemento: ", e);
+//        }
         return null;
     }
 
