@@ -25,14 +25,9 @@ public class SchedulerService {
         this.scheduler = Executors.newScheduledThreadPool(1);
     }
 
-    public void actualizarElementos() {
+    public void generarProcesoActualizacion() {
         try {
-            List<Elemento> elementosActualizables = actualizacionService.consultarNuevaVersion();
-
-            if (!elementosActualizables.isEmpty()) {
-                actualizacionService.descargarArchivos(elementosActualizables); //TODO: DEBERIA RETORNAR LOS ARCHIVOS
-            }
-
+            actualizacionService.actualizarElementos();
         } catch (Exception e) {
             LOG.error("Error general al generar la tarea de consulta: ", e);
         } finally {
@@ -43,7 +38,7 @@ public class SchedulerService {
     private void generarNuevaHoraConsulta() {
         LocalDateTime horaEspecifica = LocalDateTime.now().plusHours((int) ((Math.random() * (10 - 2)) + 2));
         long delay = LocalDateTime.now().until(horaEspecifica, ChronoUnit.SECONDS);
-        scheduler.scheduleAtFixedRate(this::actualizarElementos, delay, TimeUnit.HOURS.toSeconds(24), TimeUnit.SECONDS);
+        scheduler.scheduleAtFixedRate(this::generarProcesoActualizacion, delay, TimeUnit.HOURS.toSeconds(24), TimeUnit.SECONDS);
     }
 
     public void detenerScheduler() {

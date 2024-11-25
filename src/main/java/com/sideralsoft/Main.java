@@ -7,7 +7,6 @@ public class Main {
 //        DetalleCertificados d = new DetalleCertificados();
 //        d.comprobarValidezCertificados();
         SchedulerService schedulerService = new SchedulerService();
-        schedulerService.actualizarElementos();
-
+        schedulerService.generarProcesoActualizacion();
     }
 }

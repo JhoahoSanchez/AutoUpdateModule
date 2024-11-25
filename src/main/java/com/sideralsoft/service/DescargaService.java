@@ -2,8 +2,9 @@ package com.sideralsoft.service;
 
 import com.sideralsoft.config.ApplicationProperties;
 import com.sideralsoft.domain.model.Elemento;
-import com.sideralsoft.utils.ElementosSingleton;
 import com.sideralsoft.utils.JsonUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import java.io.*;
 import java.net.URI;
@@ -14,89 +15,93 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.util.List;
+import java.util.Optional;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipInputStream;
 
 public class DescargaService {
 
-    public static void main(String[] args) {
-        String url = "api.url";
-        String outputDirectory = "/home/jhoaho/Descargas/PruebaAPI";
+    private static final Logger LOG = LoggerFactory.getLogger(DescargaService.class);
 
-
-        try {
-            // Enviar solicitud GET para descargar el archivo zip
-
-            //List<Elemento> elementos = ElementosSingleton.getInstance().obtenerElementos();
-            String json = """
-                            {
-                              "nombre": "interfaz-hormolab",
-                              "version": "1.0.0",
-                              "hash": "45eae8f94b5b813c1802abd592c838f856b87529",
-                              "tipo": "APLICACION",
-                              "ruta": "C:/Sideralsoft/sistemas-externos/hormolab"
-                            }
-                        """;
-            HttpClient client = HttpClient.newHttpClient();
+    public String descargarArchivos(Elemento elemento) {
+        String rutaTemporal = null;
+        try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(ApplicationProperties.getProperty("api.url") + "/buscar-actualizacion"))
                     .header("Content-Type", "application/json")
                     .header("Authorization", ApplicationProperties.getProperty("api.token"))
-                    .POST(HttpRequest.BodyPublishers.ofString(json))
+                    .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(elemento)))
                     .build();
 
             HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
-            if (response.statusCode() == 200) {
-                // Guardar el archivo zip temporalmente
-                Path zipPath = Paths.get(outputDirectory, "files.zip");
-                if (!Files.exists(zipPath)) {
-                    Files.createDirectories(zipPath);
-                }
-                Files.copy(response.body(), zipPath, StandardCopyOption.REPLACE_EXISTING);
-
-                // Descomprimir el archivo zip en la carpeta destino
-                unzip(zipPath.toString(), outputDirectory);
-
-                // Eliminar el archivo zip descargado después de extraerlo
-                //Files.deleteIfExists(zipPath);
-                System.out.println("Archivos descargados y descomprimidos exitosamente en: " + outputDirectory);
-            } else {
-                System.out.println("Error al descargar los archivos. Código de respuesta: " + response.statusCode());
+            if (response.statusCode() == 204) {
+                LOG.debug("No existen actualizaciones disponibles para {}", elemento.getNombre());
+                return null;
             }
 
+            if (response.statusCode() == 200) {
+                String contentDisposition = response.headers()
+                        .firstValue("Content-Disposition")
+                        .orElse("");
+
+                String nombreArchivo = Optional.of(contentDisposition)
+                        .filter(header -> header.contains("filename="))
+                        .map(header -> header.split("filename=")[1].replace("\"", "").trim())
+                        .orElse("files.zip");
+
+                Path rutaArchivoZIP = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"), nombreArchivo);
+                if (!Files.exists(rutaArchivoZIP)) {
+                    Files.createDirectories(rutaArchivoZIP);
+                }
+
+                rutaTemporal = ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal") + "\\" + elemento.getNombre();
+                Files.copy(response.body(), rutaArchivoZIP, StandardCopyOption.REPLACE_EXISTING);
+                descomprimirArchivoZIP(rutaArchivoZIP.toString(), rutaTemporal);
+
+                Files.deleteIfExists(rutaArchivoZIP);
+                LOG.debug("Archivos descargados y descomprimidos exitosamente en: {}", ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"));
+            } else {
+                LOG.debug("Error al descargar los archivos. Código de respuesta: {}", response.statusCode());
+            }
         } catch (Exception e) {
-            e.printStackTrace();
+            LOG.error("Ha ocurrido un error al descargar el archivo: {}", e.getMessage());
         }
+        return rutaTemporal;
     }
 
-    // Método para descomprimir el archivo ZIP
-    public static void unzip(String zipFilePath, String destDirectory) throws IOException {
-        File destDir = new File(destDirectory);
-        if (!destDir.exists()) {
-            destDir.mkdir();
+    private void descomprimirArchivoZIP(String rutaArchivoZIP, String directorioDestino) throws IOException {
+        File rutaDestino = new File(directorioDestino);
+        if (!rutaDestino.exists()) {
+            rutaDestino.mkdir();
         }
 
-        try (ZipInputStream zipIn = new ZipInputStream(new FileInputStream(zipFilePath))) {
-            ZipEntry entry = zipIn.getNextEntry();
-            while (entry != null) {
-                File filePath = new File(destDirectory, entry.getName());
-                if (!entry.isDirectory()) {
-                    // Si es un archivo, extraerlo
-                    try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(filePath))) {
+        try (ZipInputStream zipInputStream = new ZipInputStream(new FileInputStream(rutaArchivoZIP))) {
+            ZipEntry entrada = zipInputStream.getNextEntry();
+
+            while (entrada != null) {
+                File rutaArchivo = new File(directorioDestino, entrada.getName());
+
+                if (entrada.isDirectory()) {
+                    if (!rutaArchivo.exists()) {
+                        rutaArchivo.mkdirs();
+                    }
+                } else {
+                    File parentDir = rutaArchivo.getParentFile();
+                    if (!parentDir.exists()) {
+                        parentDir.mkdirs();
+                    }
+
+                    try (BufferedOutputStream bos = new BufferedOutputStream(new FileOutputStream(rutaArchivo))) {
                         byte[] bytesIn = new byte[1024];
                         int read;
-                        while ((read = zipIn.read(bytesIn)) != -1) {
+                        while ((read = zipInputStream.read(bytesIn)) != -1) {
                             bos.write(bytesIn, 0, read);
                         }
                     }
-                } else {
-                    // Si es un directorio, crear la carpeta
-                    filePath.mkdirs();
                 }
-                zipIn.closeEntry();
-                entry = zipIn.getNextEntry();
+                zipInputStream.closeEntry();
+                entrada = zipInputStream.getNextEntry();
             }
         }
     }

@@ -1,13 +1,27 @@
 package com.sideralsoft.domain;
 
-public class Aplicacion implements Actualizable{
-    @Override
-    public void actualizar() {
+import com.sideralsoft.domain.model.Elemento;
 
+public class Aplicacion implements Actualizable {
+
+    private Elemento elemento;
+    private String ruta;
+
+    public Aplicacion(Elemento elemento, String ruta) {
+        this.elemento = elemento;
+        this.ruta = ruta;
     }
 
     @Override
-    public void detenerProceso() {
+    public void actualizar() {
+        this.detenerProcesos();
+        this.reemplazarElementos();
+        this.borrarArchivosTemporales();
+        this.iniciarProcesos();
+    }
+
+    @Override
+    public void detenerProcesos() {
 
     }
 
@@ -22,7 +36,7 @@ public class Aplicacion implements Actualizable{
     }
 
     @Override
-    public void iniciarProceso() {
+    public void iniciarProcesos() {
 
     }
 }

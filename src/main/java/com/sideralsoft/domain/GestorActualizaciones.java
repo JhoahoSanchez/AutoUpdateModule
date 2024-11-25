@@ -1,6 +1,12 @@
 package com.sideralsoft.domain;
 
-public class GestorActualizaciones extends Aplicacion{
+import com.sideralsoft.domain.model.Elemento;
+
+public class GestorActualizaciones extends Aplicacion {
+
+    public GestorActualizaciones(Elemento elemento, String ruta) {
+        super(elemento, ruta);
+    }
 
     @Override
     public void actualizar() {
