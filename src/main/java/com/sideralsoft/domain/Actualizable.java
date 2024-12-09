@@ -1,17 +1,15 @@
 package com.sideralsoft.domain;
 
-import com.sideralsoft.domain.model.Elemento;
-
 public interface Actualizable {
 
     void actualizar();
 
-    void detenerProcesos();
+    void detenerProcesos() throws Exception;
 
-    void reemplazarElementos();
+    void reemplazarElementos() throws Exception;
 
-    void borrarArchivosTemporales();
+    void borrarArchivosTemporales() throws Exception;
 
-    void iniciarProcesos();
+    void iniciarProcesos() throws Exception;
 
 }

@@ -14,6 +14,10 @@ public class Elemento {
     private String ruta;
     @JsonProperty("tipo")
     private TipoElemento tipo;
+    @JsonProperty("proceso")
+    private String proceso;
+    @JsonProperty("rutaProceso")
+    private String rutaProceso;
 
     public Elemento() {
     }
@@ -56,6 +60,22 @@ public class Elemento {
 
     public void setTipo(TipoElemento tipo) {
         this.tipo = tipo;
+    }
+
+    public String getProceso() {
+        return proceso;
+    }
+
+    public void setProceso(String proceso) {
+        this.proceso = proceso;
+    }
+
+    public String getRutaProceso() {
+        return rutaProceso;
+    }
+
+    public void setRutaProceso(String rutaProceso) {
+        this.rutaProceso = rutaProceso;
     }
 
     @Override

@@ -2,6 +2,9 @@ package com.sideralsoft.service;
 
 import com.sideralsoft.config.SparkConfig;
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.utils.ElementosSingleton;
+import com.sideralsoft.utils.http.InstruccionResponse;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -16,17 +19,40 @@ public class SchedulerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerService.class);
 
+    private final ElementosSingleton elementosSingleton;
     private final ActualizacionService actualizacionService;
+    private final ConsultaService consultaService;
     private final ScheduledExecutorService scheduler;
 
     public SchedulerService() {
         SparkConfig.getInstance();
+        this.elementosSingleton = ElementosSingleton.getInstance();
         this.actualizacionService = new ActualizacionService();
+        this.consultaService = new ConsultaService();
         this.scheduler = Executors.newScheduledThreadPool(1);
     }
 
     public void generarProcesoActualizacion() {
         try {
+            for (Elemento elemento : elementosSingleton.obtenerElementos()) {
+
+                String version = consultaService.existeActualizacionDisponible(elemento);
+
+                if (!StringUtils.isNotBlank(version)) {
+                    continue;
+                }
+
+                List<InstruccionResponse> instrucciones = consultaService.obtenerInstrucciones(elemento, version);
+
+                if (instrucciones == null || instrucciones.isEmpty()) {
+                    continue;
+                }
+
+                //actualiza
+                actualizacionService.actualizarElemento(elemento, instrucciones, version);
+            }
+
+
             actualizacionService.actualizarElementos();
         } catch (Exception e) {
             LOG.error("Error general al generar la tarea de consulta: ", e);
