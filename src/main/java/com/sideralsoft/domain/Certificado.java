@@ -1,42 +1,63 @@
 package com.sideralsoft.domain;
 
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.service.CertificadoService;
+import org.apache.commons.io.FileUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
+import java.io.File;
+import java.io.IOException;
 
 public class Certificado implements Actualizable {
 
-    private Elemento elemento;
-    private String ruta;
+    private static final Logger LOG = LoggerFactory.getLogger(Certificado.class);
 
-    public Certificado(Elemento elemento, String ruta) {
+    private final Elemento elemento;
+    private final String rutaDescarga;
+    private final CertificadoService certificadoService;
+
+    public Certificado(Elemento elemento, String rutaDescarga) {
         this.elemento = elemento;
-        this.ruta = ruta;
+        this.rutaDescarga = rutaDescarga;
+        this.certificadoService = new CertificadoService();
     }
 
     @Override
     public void actualizar() {
-        this.detenerProcesos();
-        this.reemplazarElementos();
-        this.borrarArchivosTemporales();
-        this.iniciarProcesos();
+        try {
+            this.detenerProcesos();
+            this.reemplazarElementos();
+            this.borrarArchivosTemporales();
+            this.iniciarProcesos();
+        } catch (Exception e) {
+            LOG.error("Ha ocurrido un error durante la actualizacion", e);
+        }
     }
 
     @Override
     public void detenerProcesos() {
-
+        //Detener aplicaciones dependientes
     }
 
     @Override
     public void reemplazarElementos() {
-
+        this.certificadoService.actualizarCertificado(rutaDescarga, elemento.getNombre());
     }
 
     @Override
-    public void borrarArchivosTemporales() {
-
+    public void borrarArchivosTemporales() throws IOException {
+        File directorio = new File(rutaDescarga);
+        if (directorio.exists()) {
+            FileUtils.deleteDirectory(directorio);
+            LOG.debug("Directorio eliminado correctamente.");
+        } else {
+            LOG.debug("Directorio no encontrado.");
+        }
     }
 
     @Override
     public void iniciarProcesos() {
-
+        //Iniciar procesos dependientes
     }
 }

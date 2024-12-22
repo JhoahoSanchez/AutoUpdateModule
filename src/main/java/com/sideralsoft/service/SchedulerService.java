@@ -52,7 +52,6 @@ public class SchedulerService {
                 actualizacionService.actualizarElemento(elemento, instrucciones, version);
             }
 
-
             actualizacionService.actualizarElementos();
         } catch (Exception e) {
             LOG.error("Error general al generar la tarea de consulta: ", e);
