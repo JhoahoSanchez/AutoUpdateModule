@@ -1,8 +1,10 @@
 package com.sideralsoft.domain;
 
+import com.sideralsoft.utils.exception.ActualizacionException;
+
 public interface Actualizable {
 
-    void actualizar();
+    void actualizar() throws ActualizacionException;
 
     void detenerProcesos() throws Exception;
 

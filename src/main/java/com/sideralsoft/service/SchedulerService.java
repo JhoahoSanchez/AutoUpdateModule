@@ -34,7 +34,8 @@ public class SchedulerService {
 
     public void generarProcesoActualizacion() {
         try {
-            for (Elemento elemento : elementosSingleton.obtenerElementos()) {
+            List<Elemento> elementos = elementosSingleton.obtenerElementos();
+            for (Elemento elemento : elementos) {
 
                 String version = consultaService.existeActualizacionDisponible(elemento);
 
@@ -45,16 +46,17 @@ public class SchedulerService {
                 List<InstruccionResponse> instrucciones = consultaService.obtenerInstrucciones(elemento, version);
 
                 if (instrucciones == null || instrucciones.isEmpty()) {
+                    LOG.debug("No se ha encontrado instrucciones de actualizacion para " + elemento.getNombre());
                     continue;
                 }
 
-                //actualiza
-                actualizacionService.actualizarElemento(elemento, instrucciones, version);
+                if (actualizacionService.actualizarElemento(elemento, instrucciones, version)) {
+                    elemento.setVersion(version);
+                }
             }
-
-            actualizacionService.actualizarElementos();
+            elementosSingleton.actualizarArchivoElementos(elementos);
         } catch (Exception e) {
-            LOG.error("Error general al generar la tarea de consulta: ", e);
+            LOG.error("Error general al intentar actualizar los elementos: ", e);
         } finally {
             this.generarNuevaHoraConsulta();
         }

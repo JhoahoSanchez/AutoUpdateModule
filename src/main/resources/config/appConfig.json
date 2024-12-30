@@ -18,5 +18,11 @@
     "version": "3.4.7",
     "hash": "64431880b6384fae1e33aa0c377cc30e157057c9",
     "tipo": "CERTIFICADO"
+  },
+  {
+    "nombre": "prueba",
+    "version": "3.4.7",
+    "hash": "64431880b6384fae1e33aa0c377cc30e157057c9",
+    "tipo": "CERTIFICADO"
   }
 ]

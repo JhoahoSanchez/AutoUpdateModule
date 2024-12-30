@@ -29,9 +29,10 @@ public class DescargaService {
 
     public String descargarArchivos(Elemento elemento) {
         String rutaTemporal = null;
-        try (HttpClient client = HttpClient.newHttpClient()) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(ApplicationProperties.getProperty("api.url") + "/descargar-actualizacion"))
+                    .uri(new URI(ApplicationProperties.getProperty("api.url") + "/descargar-archivos"))
                     .header("Content-Type", "application/json")
                     .header("Authorization", ApplicationProperties.getProperty("api.token"))
                     .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(elemento)))
@@ -79,7 +80,7 @@ public class DescargaService {
 
         String nombre = URLEncoder.encode(elemento.getNombre(), StandardCharsets.UTF_8);
         String versionActualizable = URLEncoder.encode(version, StandardCharsets.UTF_8);
-        String baseUrl = ApplicationProperties.getProperty("api.url") + "/obtener-instrucciones";
+        String baseUrl = ApplicationProperties.getProperty("api.url") + "/descargar-archivos";
         String urlConParametros = String.format("%s?nombre=%s&ultimaVersion=%s", baseUrl, nombre, versionActualizable);
 
         try (HttpClient client = HttpClient.newHttpClient()) {

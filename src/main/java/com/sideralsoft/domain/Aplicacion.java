@@ -1,6 +1,7 @@
 package com.sideralsoft.domain;
 
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -20,7 +21,7 @@ public class Aplicacion implements Actualizable {
 
     private final Elemento elemento;
     private final List<InstruccionResponse> instrucciones;
-    private String rutaTemporal;
+    private final String rutaTemporal;
 
 
     public Aplicacion(Elemento elemento, String rutaTemporal, List<InstruccionResponse> instrucciones) {
@@ -30,7 +31,7 @@ public class Aplicacion implements Actualizable {
     }
 
     @Override
-    public void actualizar() {
+    public void actualizar() throws ActualizacionException {
         try {
             this.detenerProcesos();
             this.reemplazarElementos();
@@ -38,6 +39,7 @@ public class Aplicacion implements Actualizable {
             this.iniciarProcesos();
         } catch (Exception e) {
             LOG.error("Ha ocurrido un error durante la actualizacion", e);
+            throw new ActualizacionException("", e);
         }
     }
 
@@ -56,7 +58,6 @@ public class Aplicacion implements Actualizable {
 
     @Override
     public void reemplazarElementos() throws IOException {
-
         for (InstruccionResponse instruccion : instrucciones) {
             Path sourcePath = Paths.get(rutaTemporal, instruccion.getRutaInstalacion()); //TODO: Comprobar
             Path targetPath = Paths.get(elemento.getRuta(), instruccion.getRutaInstalacion());

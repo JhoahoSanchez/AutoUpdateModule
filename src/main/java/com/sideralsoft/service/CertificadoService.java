@@ -58,7 +58,6 @@ public class CertificadoService {
         }
     }
 
-
     private void ejecutarProceso(ProcessBuilder processBuilder, String mensaje) throws IOException, InterruptedException {
         LOG.debug(mensaje);
         processBuilder.inheritIO();
@@ -69,5 +68,4 @@ public class CertificadoService {
             throw new RuntimeException("El comando falló con código de salida: " + exitCode);
         }
     }
-
 }

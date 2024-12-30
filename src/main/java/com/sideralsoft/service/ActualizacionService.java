@@ -6,6 +6,7 @@ import com.sideralsoft.domain.Certificado;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.utils.ElementosSingleton;
+import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -41,28 +42,36 @@ public class ActualizacionService {
 
             if (elemento.getTipo().equals(TipoElemento.CERTIFICADO)) {
                 actualizable = new Certificado(elemento, rutaTemporal);
-                actualizable.actualizar();
+                //actualizable.actualizar();
             }
         }
     }
 
-    public void actualizarElemento(Elemento elemento, List<InstruccionResponse> instrucciones, String version) {
+    public boolean actualizarElemento(Elemento elemento, List<InstruccionResponse> instrucciones, String version) {
         String rutaTemporal = descargaService.descargarArchivos(elemento, instrucciones, version);
 
-        if (!StringUtils.isNotBlank(rutaTemporal)) {
-            return;
+        if (StringUtils.isBlank(rutaTemporal)) {
+            return false;
         }
 
-        Actualizable actualizable;
-        if (elemento.getTipo().equals(TipoElemento.APLICACION)) {
-            actualizable = new Aplicacion(elemento, rutaTemporal, instrucciones);
-            actualizable.actualizar();
-            return;
+        try {
+            Actualizable actualizable;
+            if (elemento.getTipo().equals(TipoElemento.APLICACION)) {
+                actualizable = new Aplicacion(elemento, rutaTemporal, instrucciones);
+                actualizable.actualizar();
+                return true;
+            }
+
+            if (elemento.getTipo().equals(TipoElemento.CERTIFICADO)) {
+                actualizable = new Certificado(elemento, rutaTemporal);
+                actualizable.actualizar();
+                return true;
+            }
+        } catch (ActualizacionException e) {
+            LOG.error("Error al actualizar el elemento " + elemento.getNombre(), e);
+            return false;
         }
 
-        if (elemento.getTipo().equals(TipoElemento.CERTIFICADO)) {
-            actualizable = new Certificado(elemento, rutaTemporal);
-            actualizable.actualizar();
-        }
+        return false;
     }
 }

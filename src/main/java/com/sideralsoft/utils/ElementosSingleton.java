@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.List;
 
 public class ElementosSingleton {
@@ -36,5 +37,20 @@ public class ElementosSingleton {
         return elementos;
     }
 
+    public void actualizarArchivoElementos(List<Elemento> elementos) {
+        try {
+            JsonUtils.getMapper().writerWithDefaultPrettyPrinter().writeValue(new File(rutaArchivo), elementos);
+        } catch (IOException e) {
+            LOG.error("Ha ocurrido un error durante la actualizacion del archivo de elementos: ", e);
+        }
+    }
 
+    public Elemento obtenerElemento(String nombre) {
+        return this
+                .obtenerElementos()
+                .stream()
+                .filter(elemento -> elemento.getNombre().equals(nombre))
+                .findFirst()
+                .orElse(null);
+    }
 }
