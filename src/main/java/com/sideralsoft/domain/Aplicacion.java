@@ -2,6 +2,7 @@ package com.sideralsoft.domain;
 
 import com.sideralsoft.config.ApplicationProperties;
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.service.RollbackService;
 import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.exception.InstalacionException;
 import com.sideralsoft.utils.http.InstruccionResponse;
@@ -23,33 +24,47 @@ public class Aplicacion implements Actualizable, Instalable {
     private final List<InstruccionResponse> instrucciones;
     private final String rutaTemporal;
 
+    private final RollbackService rollbackService;
+
     public Aplicacion(Elemento elemento, String rutaTemporal) {
         this.elemento = elemento;
         this.rutaTemporal = rutaTemporal;
         this.instrucciones = null;
+
+        this.rollbackService = null;
     }
 
     public Aplicacion(Elemento elemento, String rutaTemporal, List<InstruccionResponse> instrucciones) {
         this.elemento = elemento;
         this.rutaTemporal = rutaTemporal;
         this.instrucciones = instrucciones;
+
+        this.rollbackService = new RollbackService(elemento.getNombre());
     }
 
     @Override
     public void actualizar() throws ActualizacionException {
         try {
             this.detenerProcesos();
+        } catch (Exception e) {
+            LOG.error("Ha ocurrido un error al detener los procesos.", e);
+            throw new ActualizacionException("Ha ocurrido un error al detener los procesos.", e);
+        }
+
+        try {
+            this.rollbackService.generarPuntoRestauracion();
             this.reemplazarElementos();
             this.borrarArchivosTemporales();
             this.iniciarProcesos();
         } catch (Exception e) {
             LOG.error("Ha ocurrido un error durante la actualizacion", e);
-            throw new ActualizacionException("", e);
+            this.rollbackService.regresarAPuntoRestauracion();
+            throw new ActualizacionException("Ha ocurrido un error durante la actualizacion", e);
         }
     }
 
     @Override
-    public void detenerProcesos() throws Exception {
+    public void detenerProcesos() throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder("taskkill", "/F", "/IM", elemento.getProceso());
         Process process = processBuilder.start();
 

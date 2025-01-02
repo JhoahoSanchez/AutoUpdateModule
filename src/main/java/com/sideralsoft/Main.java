@@ -8,5 +8,14 @@ public class Main {
 //        schedulerService.generarProcesoActualizacion();
 
         SparkConfig.getInstance();
+
+        /*
+        TODO:
+        - IMPLEMENTAR ROLLBACK (COPIAR LOGICA DE INSTALACION DE ROLLBACK) EXCLUSIVO ACTUALIZACION
+        - VER LA MANERA DE AGREGAR LOS PROCESOS A EL APPCONFIG
+        - IMPLEMENTAR ACTUALIZACION PROPIA
+        - REALIZAR PRUEBAS DE TODOS LOS COMPONENTES
+
+         */
     }
 }
