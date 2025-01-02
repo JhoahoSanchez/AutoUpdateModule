@@ -11,11 +11,11 @@ public class Main {
 
         /*
         TODO:
-        - IMPLEMENTAR ROLLBACK (COPIAR LOGICA DE INSTALACION DE ROLLBACK) EXCLUSIVO ACTUALIZACION
-        - VER LA MANERA DE AGREGAR LOS PROCESOS A EL APPCONFIG
         - IMPLEMENTAR ACTUALIZACION PROPIA
+        - VER LA MANERA DE AGREGAR LOS PROCESOS A EL APPCONFIG
         - REALIZAR PRUEBAS DE TODOS LOS COMPONENTES
 
+        -- agregar excepciones en actualizaciones para generar tarea de actualizacion luego X tiempo
          */
     }
 }

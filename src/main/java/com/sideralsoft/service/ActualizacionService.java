@@ -11,6 +11,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.IOException;
 import java.util.List;
 
 public class ActualizacionService {
@@ -66,11 +67,21 @@ public class ActualizacionService {
                 actualizable.actualizar();
                 return true;
             }
+
+            if (elemento.getTipo().equals(TipoElemento.APLICACION_GESTOR)) {
+                RollbackService rollbackService = new RollbackService(elemento.getNombre());
+                rollbackService.generarPuntoRestauracion();
+
+                new ProcessBuilder("java", "-jar", "updater.jar").start();
+                System.exit(0);
+            }
         } catch (ActualizacionException e) {
             LOG.error("Error al actualizar el elemento " + elemento.getNombre(), e);
             return false;
+        } catch (IOException e) {
+            LOG.error("Ha ocurrido un error general al intentar actualizar el elemento " + elemento.getNombre(), e);
+            return false;
         }
-
         return false;
     }
 }
