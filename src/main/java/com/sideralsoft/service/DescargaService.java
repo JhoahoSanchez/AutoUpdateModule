@@ -27,48 +27,98 @@ public class DescargaService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DescargaService.class);
 
-    public String descargarArchivos(Elemento elemento) {
+//    public String descargarArchivos(Elemento elemento) {
+//        String rutaTemporal = null;
+//        try {
+//            HttpClient client = HttpClient.newHttpClient();
+//            HttpRequest request = HttpRequest.newBuilder()
+//                    .uri(new URI(ApplicationProperties.getProperty("api.url") + "/descargar-archivos"))
+//                    .header("Content-Type", "application/json")
+//                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
+//                    .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(elemento)))
+//                    .build();
+//
+//            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+//
+//            if (response.statusCode() == 204) {
+//                LOG.debug("No existen actualizaciones disponibles para {}", elemento.getNombre());
+//                return null;
+//            }
+//
+//            if (response.statusCode() == 200) {
+//                String contentDisposition = response.headers()
+//                        .firstValue("Content-Disposition")
+//                        .orElse("");
+//
+//                String nombreArchivo = Optional.of(contentDisposition)
+//                        .filter(header -> header.contains("filename="))
+//                        .map(header -> header.split("filename=")[1].replace("\"", "").trim())
+//                        .orElse("files.zip");
+//
+//                Path rutaArchivoZIP = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"), nombreArchivo);
+//                if (!Files.exists(rutaArchivoZIP)) {
+//                    Files.createDirectories(rutaArchivoZIP);
+//                }
+//
+//                rutaTemporal = ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal") + "\\" + elemento.getNombre();
+//                Files.copy(response.body(), rutaArchivoZIP, StandardCopyOption.REPLACE_EXISTING);
+//                descomprimirArchivoZIP(rutaArchivoZIP.toString(), rutaTemporal);
+//
+//                Files.deleteIfExists(rutaArchivoZIP);
+//                LOG.debug("Archivos descargados y descomprimidos exitosamente en: {}", ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"));
+//            } else {
+//                LOG.debug("Error al descargar los archivos. Código de respuesta: {}", response.statusCode());
+//            }
+//        } catch (Exception e) {
+//            LOG.error("Ha ocurrido un error al descargar el archivo: {}", e.getMessage());
+//        }
+//        return rutaTemporal;
+//    }
+
+    public String descargarArchivos(Elemento elemento, String version) {
         String rutaTemporal = null;
-        try {
-            HttpClient client = HttpClient.newHttpClient();
+
+        String nombre = URLEncoder.encode(elemento.getNombre(), StandardCharsets.UTF_8);
+        String versionActualizable = URLEncoder.encode(version, StandardCharsets.UTF_8);
+        String baseUrl = ApplicationProperties.getProperty("api.url") + "/descargar-archivos";
+        String urlConParametros = String.format("%s?nombre=%s&ultimaVersion=%s", baseUrl, nombre, versionActualizable);
+
+        try (HttpClient client = HttpClient.newHttpClient()) {
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(ApplicationProperties.getProperty("api.url") + "/descargar-archivos"))
+                    .uri(new URI(urlConParametros))
                     .header("Content-Type", "application/json")
                     .header("Authorization", ApplicationProperties.getProperty("api.token"))
-                    .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(elemento)))
+                    .GET()
                     .build();
 
             HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
-            if (response.statusCode() == 204) {
-                LOG.debug("No existen actualizaciones disponibles para {}", elemento.getNombre());
+            if (response.statusCode() != 200) {
+                LOG.debug("No se ha encontrado el elemento a descargar." + response.statusCode());
                 return null;
             }
 
-            if (response.statusCode() == 200) {
-                String contentDisposition = response.headers()
-                        .firstValue("Content-Disposition")
-                        .orElse("");
+            String contentDisposition = response.headers()
+                    .firstValue("Content-Disposition")
+                    .orElse("");
 
-                String nombreArchivo = Optional.of(contentDisposition)
-                        .filter(header -> header.contains("filename="))
-                        .map(header -> header.split("filename=")[1].replace("\"", "").trim())
-                        .orElse("files.zip");
+            String nombreArchivo = Optional.of(contentDisposition)
+                    .filter(header -> header.contains("filename="))
+                    .map(header -> header.split("filename=")[1].replace("\"", "").trim())
+                    .orElse("files.zip");
 
-                Path rutaArchivoZIP = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"), nombreArchivo);
-                if (!Files.exists(rutaArchivoZIP)) {
-                    Files.createDirectories(rutaArchivoZIP);
-                }
-
-                rutaTemporal = ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal") + "\\" + elemento.getNombre();
-                Files.copy(response.body(), rutaArchivoZIP, StandardCopyOption.REPLACE_EXISTING);
-                descomprimirArchivoZIP(rutaArchivoZIP.toString(), rutaTemporal);
-
-                Files.deleteIfExists(rutaArchivoZIP);
-                LOG.debug("Archivos descargados y descomprimidos exitosamente en: {}", ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"));
-            } else {
-                LOG.debug("Error al descargar los archivos. Código de respuesta: {}", response.statusCode());
+            Path rutaArchivoZIP = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"), nombreArchivo);
+            if (!Files.exists(rutaArchivoZIP)) {
+                Files.createDirectories(rutaArchivoZIP);
             }
+
+            rutaTemporal = ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal") + "\\" + elemento.getNombre();
+            Files.copy(response.body(), rutaArchivoZIP, StandardCopyOption.REPLACE_EXISTING);
+            descomprimirArchivoZIP(rutaArchivoZIP.toString(), rutaTemporal);
+
+            Files.deleteIfExists(rutaArchivoZIP);
+            LOG.debug("Archivos descargados y descomprimidos exitosamente en: {}", ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"));
+
         } catch (Exception e) {
             LOG.error("Ha ocurrido un error al descargar el archivo: {}", e.getMessage());
         }

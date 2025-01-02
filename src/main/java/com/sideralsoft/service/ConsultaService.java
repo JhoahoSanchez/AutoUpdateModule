@@ -114,33 +114,4 @@ public class ConsultaService {
         }
         return null;
     }
-
-    public List<InstruccionResponse> obtenerInstrucciones(String elemento, String version) {
-        String nombre = URLEncoder.encode(elemento, StandardCharsets.UTF_8);
-        String ultimaVersion = URLEncoder.encode(version, StandardCharsets.UTF_8);
-        String baseUrl = ApplicationProperties.getProperty("api.url") + "/obtener-instrucciones-instalacion";
-        String urlConParametros = String.format("%s?nombre=%s&ultimaVersion=%s", baseUrl, nombre, ultimaVersion);
-
-        try (HttpClient client = HttpClient.newHttpClient()) {
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(urlConParametros))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
-
-            if (response.statusCode() != 200) {
-                LOG.debug("Error al consultar la API: {}", response.body());
-                return null;
-            }
-
-            return JsonUtils.fromJsonToList(response.body(), InstruccionResponse.class);
-        } catch (Exception e) {
-            LOG.error("Error al consultar instrucciones: {}", e.getMessage());
-            return null;
-        }
-    }
-
 }

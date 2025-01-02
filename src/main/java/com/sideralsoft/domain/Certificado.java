@@ -2,6 +2,7 @@ package com.sideralsoft.domain;
 
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.service.CertificadoService;
+import com.sideralsoft.utils.exception.InstalacionException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -9,7 +10,7 @@ import org.slf4j.LoggerFactory;
 import java.io.File;
 import java.io.IOException;
 
-public class Certificado implements Actualizable {
+public class Certificado implements Actualizable, Instalable {
 
     private static final Logger LOG = LoggerFactory.getLogger(Certificado.class);
 
@@ -37,7 +38,6 @@ public class Certificado implements Actualizable {
 
     @Override
     public void detenerProcesos() {
-        //Detener aplicaciones dependientes
     }
 
     @Override
@@ -58,6 +58,15 @@ public class Certificado implements Actualizable {
 
     @Override
     public void iniciarProcesos() {
-        //Iniciar procesos dependientes
+    }
+
+    @Override
+    public void instalar() throws InstalacionException {
+        try {
+            this.certificadoService.instalarCertificado(rutaDescarga);
+        } catch (Exception e) {
+            LOG.error("Ha ocurrido un error durante la instalacion de certificados.", e);
+            throw new InstalacionException("Ha ocurrido un error durante la instalacion de certificados.", e);
+        }
     }
 }

@@ -9,34 +9,14 @@ public class CertificadoService {
 
     private final static Logger LOG = LoggerFactory.getLogger(CertificadoService.class);
 
-//    public void comprobarValidezCertificados() { //Logica para forzar actualizacion, comprobar
-//        try {
-//            KeyStore windowsKeyStore = KeyStore.getInstance("Windows-ROOT");
-//            windowsKeyStore.load(null, null);
-//
-//            Enumeration<String> aliases = windowsKeyStore.aliases();
-//            while (aliases.hasMoreElements()) {
-//                String alias = aliases.nextElement();
-//
-//                if (windowsKeyStore.isCertificateEntry(alias) && alias.equals(CertificadoService.alias)) {
-//                    X509Certificate certificado = (X509Certificate) windowsKeyStore.getCertificate(alias);
-//                    long tiempoMinimo = 30L * 24L * 60L * 60L * 1000L; // 30 días en milisegundos
-//                    Date fechaActual = new Date();
-//                    long tiempoRestante = certificado.getNotAfter().getTime() - fechaActual.getTime();
-//
-//                    if (tiempoRestante <= tiempoMinimo) {
-//                        System.out.println("El certificado expira pronto. Debería actualizarse."); //reemplazar por log4j
-//                        this.actualizarCertificado();
-//                    } else {
-//                        System.out.println("El certificado es válido."); //reemplazar por log4j
-//                    }
-//                    System.out.println("--------------------------------------------------"); //reemplazar por log4j
-//                }
-//            }
-//        } catch (Exception e) {
-//            e.printStackTrace(); //reemplazar por log4j
-//        }
-//    }
+    public void instalarCertificado(String rutaDescarga) throws IOException, InterruptedException {
+        ProcessBuilder importarCertificado = new ProcessBuilder(
+                "cmd.exe", "/c", "certutil", "-addstore", "Root", rutaDescarga
+        );
+        this.ejecutarProceso(importarCertificado, "Importando nuevo certificado...");
+
+        LOG.debug("Certificado instalado exitosamente.");
+    }
 
     public void actualizarCertificado(String rutaDescarga, String alias) {
         try {

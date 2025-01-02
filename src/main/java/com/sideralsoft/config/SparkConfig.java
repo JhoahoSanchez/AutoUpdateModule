@@ -4,6 +4,7 @@ import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.service.ActualizacionService;
 import com.sideralsoft.service.ConsultaService;
+import com.sideralsoft.service.InstalacionService;
 import com.sideralsoft.utils.ElementosSingleton;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -15,9 +16,9 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
-import java.util.stream.Collectors;
 
-import static spark.Spark.*;
+import static spark.Spark.get;
+import static spark.Spark.post;
 
 public class SparkConfig {
 
@@ -26,10 +27,13 @@ public class SparkConfig {
 
     private final ConsultaService consultaService;
     private final ActualizacionService actualizacionService;
+    private final InstalacionService instalacionService;
 
     private SparkConfig() {
         consultaService = new ConsultaService();
         actualizacionService = new ActualizacionService();
+        instalacionService = new InstalacionService();
+
         configurarSpark();
         configurarRutas();
     }
@@ -76,14 +80,6 @@ public class SparkConfig {
                     return "No se ha encontrado el elemento " + nombre;
                 }
 
-                List<InstruccionResponse> instrucciones = consultaService.obtenerInstrucciones(nombre, version);
-
-                if (instrucciones == null || instrucciones.isEmpty()) {
-                    LOG.debug("No se ha encontrado instrucciones de instalacio para " + nombre);
-                    res.status(204);
-                    return "No se ha encontrado instrucciones de instalacion para " + nombre;
-                }
-
                 Elemento elemento = new Elemento();
                 elemento.setNombre(nombre);
                 elemento.setTipo(tipo);
@@ -91,7 +87,7 @@ public class SparkConfig {
 
                 if (tipo.equals(TipoElemento.APLICACION)) {
                     elemento.setRuta(ApplicationProperties.getProperty("app.config.storage.rutaInstalacion") + "\\" + nombre);
-                    Path rutaInstalacion = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaInstalacion") + "\\" + nombre);
+                    Path rutaInstalacion = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaInstalacion"), nombre);
 
                     if (!Files.exists(rutaInstalacion)) {
                         if (!rutaInstalacion.toFile().mkdirs()) {
@@ -102,9 +98,12 @@ public class SparkConfig {
                     elemento.setRuta(rutaInstalacion.toFile().getAbsolutePath());
                 }
 
-                if (actualizacionService.actualizarElemento(elemento, instrucciones, version)) {
-                    elemento.setVersion(version);
+                if (!instalacionService.instalarElemento(elemento, version)) {
+                    res.status(500);
+                    return "Ha ocurrido un error durante la instalacion.";
                 }
+
+                elemento.setVersion(version);
 
                 List<Elemento> elementos = ElementosSingleton.getInstance().obtenerElementos();
                 elementos.add(elemento);
