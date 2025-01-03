@@ -5,6 +5,7 @@ import com.sideralsoft.domain.Aplicacion;
 import com.sideralsoft.domain.Certificado;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.TipoElemento;
+import com.sideralsoft.utils.JsonUtils;
 import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -12,6 +13,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.IOException;
+import java.nio.file.Path;
 import java.util.List;
 
 public class ActualizacionService {
@@ -71,6 +73,9 @@ public class ActualizacionService {
             if (elemento.getTipo().equals(TipoElemento.APLICACION_GESTOR)) {
                 RollbackService rollbackService = new RollbackService(elemento.getNombre());
                 rollbackService.generarPuntoRestauracion();
+
+                Path archivoInstrucciones = Path.of(rutaTemporal, "instrucciones.json");
+                JsonUtils.toJsonFile(instrucciones, archivoInstrucciones.toFile());
 
                 new ProcessBuilder("java", "-jar", "updater.jar").start();
                 System.exit(0);

@@ -11,11 +11,10 @@ public class Main {
 
         /*
         TODO:
-        - IMPLEMENTAR ACTUALIZACION PROPIA
         - VER LA MANERA DE AGREGAR LOS PROCESOS A EL APPCONFIG
         - REALIZAR PRUEBAS DE TODOS LOS COMPONENTES
 
-        -- agregar excepciones en actualizaciones para generar tarea de actualizacion luego X tiempo
+
          */
     }
 }

@@ -36,10 +36,9 @@ public class SchedulerService {
         try {
             List<Elemento> elementos = elementosSingleton.obtenerElementos();
             for (Elemento elemento : elementos) {
-
                 String version = consultaService.existeActualizacionDisponible(elemento);
 
-                if (!StringUtils.isNotBlank(version)) {
+                if (StringUtils.isBlank(version)) {
                     continue;
                 }
 

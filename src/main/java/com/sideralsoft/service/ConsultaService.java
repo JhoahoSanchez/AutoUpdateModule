@@ -3,6 +3,8 @@ package com.sideralsoft.service;
 import com.sideralsoft.config.ApplicationProperties;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.utils.JsonUtils;
+import com.sideralsoft.utils.exception.ActualizacionException;
+import com.sideralsoft.utils.exception.InstalacionException;
 import com.sideralsoft.utils.http.ActualizacionResponse;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.slf4j.Logger;
@@ -20,7 +22,7 @@ public class ConsultaService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsultaService.class);
 
-    public String existeActualizacionDisponible(Elemento elemento) {
+    public String existeActualizacionDisponible(Elemento elemento) throws ActualizacionException {
         String nombre = URLEncoder.encode(elemento.getNombre(), StandardCharsets.UTF_8);
         String version = URLEncoder.encode(elemento.getVersion(), StandardCharsets.UTF_8);
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/buscar-actualizacion";
@@ -34,30 +36,26 @@ public class ConsultaService {
                     .GET()
                     .build();
 
-            // Enviar la solicitud y obtener la respuesta
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            // Interpretar la respuesta
             if (response.statusCode() == 204) {
                 LOG.debug("No existen nuevas versiones disponibles");
                 return null;
             }
 
             if (response.statusCode() == 200) {
-                // Parsear la respuesta JSON (si el contenido está presente)
                 ActualizacionResponse actualizacionResponse = JsonUtils.fromJson(response.body(), ActualizacionResponse.class);
                 LOG.debug("Existe una nueva versión del elemento {} a la version {}", elemento.getNombre(), actualizacionResponse.getVersion());
                 return actualizacionResponse.getVersion();
-            } else {
-                LOG.debug("Error al consultar la API: {}", response.body());
             }
         } catch (Exception e) {
-            LOG.error("Error al consultar la API: {}", e.getMessage());
+            LOG.error("Error al consultar la API:", e);
+            throw new ActualizacionException("Error al consultar la API", e);
         }
         return null;
     }
 
-    public String existeInstalacionDisponible(String nombre) {
+    public String existeInstalacionDisponible(String nombre) throws InstalacionException {
         String nombreTratado = URLEncoder.encode(nombre, StandardCharsets.UTF_8);
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/buscar-recurso";
         String urlConParametros = String.format("%s?nombre=%s", baseUrl, nombreTratado);
@@ -81,12 +79,12 @@ public class ConsultaService {
             LOG.debug("Se ha encontrado el elemento {} con la version {}", nombreTratado, actualizacionResponse.getVersion());
             return actualizacionResponse.getVersion();
         } catch (Exception e) {
-            LOG.error("Error al consultar la API: {}", e.getMessage());
-            return null;
+            LOG.error("Error al consultar la API.", e);
+            throw new InstalacionException("Error al consultar la API", e);
         }
     }
 
-    public List<InstruccionResponse> obtenerInstrucciones(Elemento elemento, String version) {
+    public List<InstruccionResponse> obtenerInstrucciones(Elemento elemento, String version) throws ActualizacionException {
         String nombre = URLEncoder.encode(elemento.getNombre(), StandardCharsets.UTF_8);
         String versionActual = URLEncoder.encode(elemento.getVersion(), StandardCharsets.UTF_8);
         String versionActualizable = URLEncoder.encode(version, StandardCharsets.UTF_8);
@@ -103,14 +101,12 @@ public class ConsultaService {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() != 200) {
-                LOG.debug("Error al consultar la API: {}", response.body());
-                return null;
+            if (response.statusCode() == 200) {
+                return JsonUtils.fromJsonToList(response.body(), InstruccionResponse.class);
             }
-
-            return JsonUtils.fromJsonToList(response.body(), InstruccionResponse.class);
         } catch (Exception e) {
-            LOG.error("Error al consultar instrucciones: {}", e.getMessage());
+            LOG.error("Error al consultar instrucciones", e);
+            throw new ActualizacionException("Error al consultar instrucciones", e);
         }
         return null;
     }
