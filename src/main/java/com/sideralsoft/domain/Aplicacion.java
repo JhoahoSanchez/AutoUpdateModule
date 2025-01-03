@@ -2,6 +2,7 @@ package com.sideralsoft.domain;
 
 import com.sideralsoft.config.ApplicationProperties;
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.domain.model.Proceso;
 import com.sideralsoft.service.RollbackService;
 import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.exception.InstalacionException;
@@ -64,15 +65,18 @@ public class Aplicacion implements Actualizable, Instalable {
     }
 
     @Override
-    public void detenerProcesos() throws IOException, InterruptedException {
-        ProcessBuilder processBuilder = new ProcessBuilder("taskkill", "/F", "/IM", elemento.getProceso());
-        Process process = processBuilder.start();
+    public void detenerProcesos() throws IOException, InterruptedException, ActualizacionException {
+        for (Proceso proceso : elemento.getProcesos()) {
+            ProcessBuilder processBuilder = new ProcessBuilder("taskkill", "/F", "/IM", proceso.getNombre());
+            Process process = processBuilder.start();
 
-        int exitCode = process.waitFor();
-        if (exitCode == 0) {
-            LOG.debug("El proceso {} fue detenido exitosamente.", elemento.getProceso());
-        } else {
-            LOG.debug("No se pudo detener el proceso {}. Código de salida: {}", elemento.getProceso(), exitCode);
+            int exitCode = process.waitFor();
+            if (exitCode == 0) {
+                LOG.debug("El proceso {} fue detenido exitosamente.", proceso.getNombre());
+            } else {
+                LOG.debug("No se pudo detener el proceso {}. Código de salida: {}", proceso.getNombre(), exitCode);
+                throw new ActualizacionException("No se pudo detener el proceso " + proceso.getNombre() + ". Código de salida: " + exitCode);
+            }
         }
     }
 
@@ -134,14 +138,17 @@ public class Aplicacion implements Actualizable, Instalable {
 
     @Override
     public void iniciarProcesos() throws Exception {
-        Process startProcess = new ProcessBuilder(this.elemento.getRutaProceso()).start();
+        for (Proceso proceso : elemento.getProcesos()) {
+            Process startProcess = new ProcessBuilder(proceso.getRuta()).start();
 
-        int exitCode = startProcess.waitFor();
+            int exitCode = startProcess.waitFor();
 
-        if (exitCode == 0) {
-            LOG.debug("El proceso {} fue iniciado exitosamente.", elemento.getProceso());
-        } else {
-            LOG.debug("No se pudo iniciar el proceso {}. Código de salida: {}", elemento.getProceso(), exitCode);
+            if (exitCode == 0) {
+                LOG.debug("El proceso {} fue iniciado exitosamente.", proceso.getNombre());
+            } else {
+                LOG.debug("No se pudo iniciar el proceso {}. Código de salida: {}", proceso.getNombre(), exitCode);
+                throw new ActualizacionException("No se pudo iniciar el proceso " + proceso.getNombre() + ". Código de salida: " + exitCode);
+            }
         }
     }
 

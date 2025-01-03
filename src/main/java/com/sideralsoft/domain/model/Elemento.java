@@ -1,7 +1,11 @@
 package com.sideralsoft.domain.model;
 
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 
+import java.util.List;
+
+@JsonIgnoreProperties(ignoreUnknown = true)
 public class Elemento {
 
     @JsonProperty("nombre")
@@ -15,9 +19,7 @@ public class Elemento {
     @JsonProperty("tipo")
     private TipoElemento tipo;
     @JsonProperty("proceso")
-    private String proceso;
-    @JsonProperty("rutaProceso")
-    private String rutaProceso;
+    private List<Proceso> procesos;
 
     public Elemento() {
     }
@@ -62,20 +64,12 @@ public class Elemento {
         this.tipo = tipo;
     }
 
-    public String getProceso() {
-        return proceso;
+    public List<Proceso> getProcesos() {
+        return procesos;
     }
 
-    public void setProceso(String proceso) {
-        this.proceso = proceso;
-    }
-
-    public String getRutaProceso() {
-        return rutaProceso;
-    }
-
-    public void setRutaProceso(String rutaProceso) {
-        this.rutaProceso = rutaProceso;
+    public void setProcesos(List<Proceso> procesos) {
+        this.procesos = procesos;
     }
 
     @Override
