@@ -1,28 +1,36 @@
-[
-  {
-    "nombre": "interfaz-hormolab",
-    "version": "1.0.0",
-    "hash": "45eae8f94b5b813c1802abd592c838f856b87529",
-    "tipo": "APLICACION",
-    "ruta": "C:/Sideralsoft/sistemas-externos/hormolab"
-  },
-  {
-    "nombre": "interfaz-hpas",
-    "version": "1.2.5",
-    "hash": "feaa2b05cc309f3287131de7bf608084247638bf",
-    "tipo": "APLICACION",
-    "ruta": "C:/Sideralsoft/sistemas-externos/hpas"
-  },
-  {
-    "nombre": "certificado-print-server",
-    "version": "3.4.7",
-    "hash": "64431880b6384fae1e33aa0c377cc30e157057c9",
-    "tipo": "CERTIFICADO"
-  },
-  {
-    "nombre": "autoupdate-module",
-    "version": "1.0.0",
-    "hash": "64431880b6384fae1e33aa0c377cc30657hgfdr6t",
-    "tipo": "APLICACION_GESTOR"
-  }
-]
+[ {
+  "nombre" : "interfaz-hormolab",
+  "version" : "1.0.0",
+  "hash" : "45eae8f94b5b813c1802abd592c838f856b87529",
+  "ruta" : "C:/Sideralsoft/sistemas-externos/hormolab",
+  "tipo" : "APLICACION",
+  "proceso" : null
+}, {
+  "nombre" : "interfaz-hpas",
+  "version" : "1.2.5",
+  "hash" : "feaa2b05cc309f3287131de7bf608084247638bf",
+  "ruta" : "C:/Sideralsoft/sistemas-externos/hpas",
+  "tipo" : "APLICACION",
+  "proceso" : null
+}, {
+  "nombre" : "certificado-print-server",
+  "version" : "3.4.7",
+  "hash" : "64431880b6384fae1e33aa0c377cc30e157057c9",
+  "ruta" : null,
+  "tipo" : "CERTIFICADO",
+  "proceso" : null
+}, {
+  "nombre" : "autoupdate-module",
+  "version" : "1.0.0",
+  "hash" : "64431880b6384fae1e33aa0c377cc30657hgfdr6t",
+  "ruta" : null,
+  "tipo" : "APLICACION_GESTOR",
+  "proceso" : null
+}, {
+  "nombre" : "orion-print-server",
+  "version" : "2.0.0",
+  "hash" : null,
+  "ruta" : "/mnt/ntfs/Windows/Universidad/Tesis/Instalaciones/orion-print-server",
+  "tipo" : "APLICACION",
+  "proceso" : null
+} ]

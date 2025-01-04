@@ -28,11 +28,12 @@ public class ConsultaService {
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/buscar-actualizacion";
         String urlConParametros = String.format("%s?nombre=%s&version=%s", baseUrl, nombre, version);
 
-        try (HttpClient client = HttpClient.newHttpClient()) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(urlConParametros))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
+                    .header("Authorization", "Bearer " + ApplicationProperties.getProperty("api.token"))
                     .GET()
                     .build();
 
@@ -60,18 +61,21 @@ public class ConsultaService {
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/buscar-recurso";
         String urlConParametros = String.format("%s?nombre=%s", baseUrl, nombreTratado);
 
-        try (HttpClient client = HttpClient.newHttpClient()) {
+        LOG.debug(urlConParametros);
+
+        try {
+            HttpClient client = HttpClient.newHttpClient(); //TODO: AGREGAR EL TOKEN
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(urlConParametros))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
+                    .header("Authorization", "Bearer " + ApplicationProperties.getProperty("api.token"))
                     .GET()
                     .build();
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() != 200) {
-                LOG.debug("No se ha encontrado el elemento.");
+                LOG.debug("Ha ocurrido un error al intentar consultar la API: " + response.body());
                 return null;
             }
 
@@ -91,11 +95,12 @@ public class ConsultaService {
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/obtener-instrucciones";
         String urlConParametros = String.format("%s?nombre=%s&versionActual=%s&versionActualizable=%s", baseUrl, nombre, versionActual, versionActualizable);
 
-        try (HttpClient client = HttpClient.newHttpClient()) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(urlConParametros))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
+                    .header("Authorization", "Bearer " + ApplicationProperties.getProperty("api.token"))
                     .GET()
                     .build();
 

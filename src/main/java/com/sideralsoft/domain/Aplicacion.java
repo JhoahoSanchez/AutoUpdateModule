@@ -66,6 +66,10 @@ public class Aplicacion implements Actualizable, Instalable {
 
     @Override
     public void detenerProcesos() throws IOException, InterruptedException, ActualizacionException {
+        if (elemento.getProcesos() == null) {
+            return;
+        }
+
         for (Proceso proceso : elemento.getProcesos()) {
             ProcessBuilder processBuilder = new ProcessBuilder("taskkill", "/F", "/IM", proceso.getNombre());
             Process process = processBuilder.start();
@@ -81,15 +85,26 @@ public class Aplicacion implements Actualizable, Instalable {
     }
 
     @Override
-    public void reemplazarElementos() throws IOException {
+    public void reemplazarElementos() throws IOException, ActualizacionException {
         assert instrucciones != null;
         for (InstruccionResponse instruccion : instrucciones) {
-            Path origen = Paths.get(rutaTemporal, instruccion.getRutaInstalacion()); //TODO: Comprobar
+            Path origen = Paths.get(rutaTemporal, instruccion.getRutaInstalacion());
             Path destino = Paths.get(elemento.getRuta(), instruccion.getRutaInstalacion());
 
             switch (instruccion.getAccion()) {
                 case AGREGAR:
                     if (Files.exists(origen)) {
+                        Path directorioDestino = destino.getParent();
+                        if (!Files.exists(directorioDestino)) {
+                            try {
+                                Files.createDirectories(directorioDestino);
+                                LOG.debug("Directorio creado: " + directorioDestino);
+                            } catch (IOException e) {
+                                LOG.error("Error al crear el directorio de destino: " + directorioDestino, e);
+                                throw new ActualizacionException("Error al crear el directorio de destino: " + directorioDestino, e);
+                            }
+                        }
+
                         Files.move(origen, destino, StandardCopyOption.REPLACE_EXISTING);
                         LOG.debug("Archivo agregado: " + instruccion.getElemento());
                     } else {
@@ -138,6 +153,10 @@ public class Aplicacion implements Actualizable, Instalable {
 
     @Override
     public void iniciarProcesos() throws Exception {
+        if (elemento.getProcesos() == null) {
+            return;
+        }
+
         for (Proceso proceso : elemento.getProcesos()) {
             Process startProcess = new ProcessBuilder(proceso.getRuta()).start();
 

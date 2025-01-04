@@ -49,7 +49,7 @@ public class SparkConfig {
         int port = Integer.parseInt(ApplicationProperties.getProperty("spark.defaultPort"));
         Spark.port(port);
         int maxThreads = Integer.parseInt(ApplicationProperties.getProperty("spark.maxThreads"));
-        Spark.threadPool(maxThreads); //TODO: COMPROBAR
+        Spark.threadPool(maxThreads);
     }
 
     private void configurarRutas() {
@@ -76,8 +76,8 @@ public class SparkConfig {
                 String version = consultaService.existeInstalacionDisponible(nombre);
 
                 if (StringUtils.isBlank(version)) {
-                    res.status(404);
-                    return "No se ha encontrado el elemento " + nombre;
+                    res.status(500);
+                    return "Ha ocurrido un error durante la consulta de " + nombre + ", revise el log";
                 }
 
                 Elemento elemento = new Elemento();
@@ -109,12 +109,13 @@ public class SparkConfig {
                 elementos.add(elemento);
 
                 ElementosSingleton.getInstance().actualizarArchivoElementos(elementos);
+                ElementosSingleton.getInstance().obtenerElementos();
 
-                return elemento.getNombre() + " ha sido actualizado exitosamente a la version " + elemento.getVersion();
+                return elemento.getNombre() + " ha sido instalado exitosamente a la version " + elemento.getVersion();
             } catch (Exception e) {
-                LOG.error("Error general al intentar actualizar los elementos: ", e);
+                LOG.error("Error general al intentar instalar los elementos: ", e);
                 res.status(500);
-                return "Error al intentar actualizar los elementos";
+                return "Error al intentar instalar los elementos";
             }
         });
 
@@ -143,16 +144,20 @@ public class SparkConfig {
                     return "No se ha encontrado instrucciones de actualizacion para " + elemento.getNombre();
                 }
 
-                if (actualizacionService.actualizarElemento(elemento, instrucciones, version)) {
-                    elemento.setVersion(version);
+                if (!actualizacionService.actualizarElemento(elemento, instrucciones, version)) {
+                    res.status(500);
+                    LOG.debug("No se ha podido actualizar el elemento");
+                    return "No se ha podido actualizar el elemento";
                 }
 
+                elemento.setVersion(version);
                 List<Elemento> elementos = ElementosSingleton.getInstance().obtenerElementos();
                 List<Elemento> elementosActualizados = elementos.stream()
                         .map(e -> e.getNombre().equals(elemento.getNombre()) ? elemento : e)
                         .toList();
 
                 ElementosSingleton.getInstance().actualizarArchivoElementos(elementosActualizados);
+                ElementosSingleton.getInstance().obtenerElementos();
 
                 return elemento.getNombre() + " ha sido actualizado exitosamente a la version " + elemento.getVersion();
             } catch (Exception e) {

@@ -1,8 +1,10 @@
 package com.sideralsoft.service;
 
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sideralsoft.config.ApplicationProperties;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.utils.JsonUtils;
+import com.sideralsoft.utils.http.ActualizacionRequest;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,67 +29,20 @@ public class DescargaService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DescargaService.class);
 
-//    public String descargarArchivos(Elemento elemento) {
-//        String rutaTemporal = null;
-//        try {
-//            HttpClient client = HttpClient.newHttpClient();
-//            HttpRequest request = HttpRequest.newBuilder()
-//                    .uri(new URI(ApplicationProperties.getProperty("api.url") + "/descargar-archivos"))
-//                    .header("Content-Type", "application/json")
-//                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
-//                    .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(elemento)))
-//                    .build();
-//
-//            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
-//
-//            if (response.statusCode() == 204) {
-//                LOG.debug("No existen actualizaciones disponibles para {}", elemento.getNombre());
-//                return null;
-//            }
-//
-//            if (response.statusCode() == 200) {
-//                String contentDisposition = response.headers()
-//                        .firstValue("Content-Disposition")
-//                        .orElse("");
-//
-//                String nombreArchivo = Optional.of(contentDisposition)
-//                        .filter(header -> header.contains("filename="))
-//                        .map(header -> header.split("filename=")[1].replace("\"", "").trim())
-//                        .orElse("files.zip");
-//
-//                Path rutaArchivoZIP = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"), nombreArchivo);
-//                if (!Files.exists(rutaArchivoZIP)) {
-//                    Files.createDirectories(rutaArchivoZIP);
-//                }
-//
-//                rutaTemporal = ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal") + "\\" + elemento.getNombre();
-//                Files.copy(response.body(), rutaArchivoZIP, StandardCopyOption.REPLACE_EXISTING);
-//                descomprimirArchivoZIP(rutaArchivoZIP.toString(), rutaTemporal);
-//
-//                Files.deleteIfExists(rutaArchivoZIP);
-//                LOG.debug("Archivos descargados y descomprimidos exitosamente en: {}", ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"));
-//            } else {
-//                LOG.debug("Error al descargar los archivos. Código de respuesta: {}", response.statusCode());
-//            }
-//        } catch (Exception e) {
-//            LOG.error("Ha ocurrido un error al descargar el archivo: {}", e.getMessage());
-//        }
-//        return rutaTemporal;
-//    }
-
     public String descargarArchivos(Elemento elemento, String version) {
         String rutaTemporal = null;
 
         String nombre = URLEncoder.encode(elemento.getNombre(), StandardCharsets.UTF_8);
         String versionActualizable = URLEncoder.encode(version, StandardCharsets.UTF_8);
-        String baseUrl = ApplicationProperties.getProperty("api.url") + "/descargar-archivos";
+        String baseUrl = ApplicationProperties.getProperty("api.url") + "/descargar-archivos-instalacion";
         String urlConParametros = String.format("%s?nombre=%s&ultimaVersion=%s", baseUrl, nombre, versionActualizable);
 
-        try (HttpClient client = HttpClient.newHttpClient()) {
+        try {
+            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(urlConParametros))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
+                    .header("Authorization", "Bearer " + ApplicationProperties.getProperty("api.token"))
                     .GET()
                     .build();
 
@@ -131,20 +86,32 @@ public class DescargaService {
         String nombre = URLEncoder.encode(elemento.getNombre(), StandardCharsets.UTF_8);
         String versionActualizable = URLEncoder.encode(version, StandardCharsets.UTF_8);
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/descargar-archivos";
-        String urlConParametros = String.format("%s?nombre=%s&ultimaVersion=%s", baseUrl, nombre, versionActualizable);
 
-        try (HttpClient client = HttpClient.newHttpClient()) {
+        ActualizacionRequest actualizacionRequest = new ActualizacionRequest();
+        actualizacionRequest.setNombre(nombre);
+        actualizacionRequest.setVersion(versionActualizable);
+        actualizacionRequest.setInstrucciones(instrucciones);
+
+        try {
+            LOG.debug(JsonUtils.toJson(actualizacionRequest));
+        } catch (JsonProcessingException e) {
+
+        }
+
+        try {
+            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(urlConParametros))
+                    .uri(new URI(baseUrl))
                     .header("Content-Type", "application/json")
-                    .header("Authorization", ApplicationProperties.getProperty("api.token"))
-                    .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(instrucciones)))
+                    .header("Authorization", "Bearer " + ApplicationProperties.getProperty("api.token"))
+                    .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(actualizacionRequest)))
                     .build();
 
             HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
 
             if (response.statusCode() != 200) {
                 LOG.debug("No se ha encontrado el elemento a descargar." + response.statusCode());
+                LOG.debug(response.body().toString());
                 return null;
             }
 
@@ -162,7 +129,7 @@ public class DescargaService {
                 Files.createDirectories(rutaArchivoZIP);
             }
 
-            rutaTemporal = ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal") + "\\" + elemento.getNombre();
+            rutaTemporal = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"), elemento.getNombre()).toString();
             Files.copy(response.body(), rutaArchivoZIP, StandardCopyOption.REPLACE_EXISTING);
             descomprimirArchivoZIP(rutaArchivoZIP.toString(), rutaTemporal);
 

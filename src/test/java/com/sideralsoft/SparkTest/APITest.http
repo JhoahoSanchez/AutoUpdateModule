@@ -1,0 +1,23 @@
+### Consulta la version local de un elemento instalado
+
+GET http://localhost:5500/version?nombre=interfaz-hormolab
+
+### Consulta la version local de un elemento no instalado
+
+GET http://localhost:5500/version?nombre=interfaz-hormola
+
+### Instala un elemento existente en la API
+
+POST http://localhost:5500/install?nombre=orion-print-server&tipo=APLICACION
+
+### Intenta instalar un elemento inexistente en la API (Error)
+
+POST http://localhost:5500/install?nombre=orion-print-serve&tipo=APLICACION
+
+### Intenta actualizar un elemento desactualizado
+
+POST http://localhost:5500/update?nombre=orion-print-server
+
+### Intenta actualizar un elemento en su ultima version (Error)
+
+###

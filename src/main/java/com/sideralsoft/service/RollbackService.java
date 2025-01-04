@@ -57,6 +57,7 @@ public class RollbackService {
         }
 
         this.copiarArchivos(rutaPuntoRestauracionAplicacion, origen);
+        LOG.debug("Se ha regresado al punto de restauracion.");
     }
 
     private void borrarArchivos(Path ruta, DirectoryStream<Path> directoryStream) throws IOException {
