@@ -21,9 +21,9 @@ public class Aplicacion implements Actualizable, Instalable {
 
     private static final Logger LOG = LoggerFactory.getLogger(Aplicacion.class);
 
-    private final Elemento elemento;
-    private final List<InstruccionResponse> instrucciones;
-    private final String rutaTemporal;
+    protected final Elemento elemento;
+    protected final List<InstruccionResponse> instrucciones;
+    protected final String rutaTemporal;
 
     private final RollbackService rollbackService;
 
