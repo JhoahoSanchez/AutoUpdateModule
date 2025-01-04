@@ -67,7 +67,7 @@ public class DescargaService {
                 Files.createDirectories(rutaArchivoZIP);
             }
 
-            rutaTemporal = ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal") + "\\" + elemento.getNombre();
+            rutaTemporal = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"), elemento.getNombre()).toString();
             Files.copy(response.body(), rutaArchivoZIP, StandardCopyOption.REPLACE_EXISTING);
             descomprimirArchivoZIP(rutaArchivoZIP.toString(), rutaTemporal);
 

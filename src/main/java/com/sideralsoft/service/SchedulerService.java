@@ -34,6 +34,7 @@ public class SchedulerService {
 
     public void generarProcesoActualizacion() {
         try {
+            LOG.debug("Iniciando proceso de actualizacion.");
             List<Elemento> elementos = elementosSingleton.obtenerElementos();
             for (Elemento elemento : elementos) {
                 String version = consultaService.existeActualizacionDisponible(elemento);

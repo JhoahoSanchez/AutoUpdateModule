@@ -73,6 +73,11 @@ public class SparkConfig {
                 String nombre = req.queryParams("nombre");
                 TipoElemento tipo = TipoElemento.valueOf(req.queryParams("tipo"));
 
+                if (ElementosSingleton.getInstance().obtenerElemento(nombre) != null) {
+                    res.status(500);
+                    return "Ya existe una instalacion de " + nombre;
+                }
+
                 String version = consultaService.existeInstalacionDisponible(nombre);
 
                 if (StringUtils.isBlank(version)) {
