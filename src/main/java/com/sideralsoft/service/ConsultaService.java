@@ -64,7 +64,7 @@ public class ConsultaService {
         LOG.debug(urlConParametros);
 
         try {
-            HttpClient client = HttpClient.newHttpClient(); //TODO: AGREGAR EL TOKEN
+            HttpClient client = HttpClient.newHttpClient();
             HttpRequest request = HttpRequest.newBuilder()
                     .uri(new URI(urlConParametros))
                     .header("Content-Type", "application/json")

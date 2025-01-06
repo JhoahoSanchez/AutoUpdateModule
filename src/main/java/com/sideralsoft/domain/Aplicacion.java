@@ -88,8 +88,8 @@ public class Aplicacion implements Actualizable, Instalable {
     public void reemplazarElementos() throws IOException, ActualizacionException {
         assert instrucciones != null;
         for (InstruccionResponse instruccion : instrucciones) {
-            Path origen = Paths.get(rutaTemporal, instruccion.getRutaInstalacion());
-            Path destino = Paths.get(elemento.getRuta(), instruccion.getRutaInstalacion());
+            Path origen = Paths.get(rutaTemporal, instruccion.getRuta());
+            Path destino = Paths.get(elemento.getRuta(), instruccion.getRuta());
 
             switch (instruccion.getAccion()) {
                 case AGREGAR:
@@ -139,7 +139,12 @@ public class Aplicacion implements Actualizable, Instalable {
     @Override
     public void borrarArchivosTemporales() {
         try {
+            if (rutaTemporal.isEmpty()) {
+                return;
+            }
+
             File directorio = new File(rutaTemporal);
+
             if (directorio.exists()) {
                 FileUtils.deleteDirectory(directorio);
                 LOG.debug("Directorio eliminado correctamente.");

@@ -10,13 +10,21 @@ GET http://localhost:5500/version?nombre=interfaz-hormola
 
 POST http://localhost:5500/install?nombre=interfaz-hormolab&tipo=APLICACION
 
+### Instala un elemento existente en la API (CERTIFICADO)
+
+POST http://localhost:5500/install?nombre=Sideralsoft&tipo=CERTIFICADO
+
 ### Intenta instalar un elemento inexistente en la API (Error)
 
 POST http://localhost:5500/install?nombre=orion-print-serve&tipo=APLICACION
 
 ### Intenta actualizar un elemento desactualizado
 
-POST http://localhost:5500/update?nombre=orion-print-server
+POST http://localhost:5500/update?nombre=interfaz-hpas
+
+### Intenta actualizar un elemento desactualizado (CERTIFICADO)
+
+POST http://localhost:5500/update?nombre=Sideralsoft
 
 ### Intenta actualizar un elemento en su ultima version (Error)
 

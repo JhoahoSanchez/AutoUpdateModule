@@ -8,6 +8,7 @@ import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.http.InstruccionResponse;
+import com.sideralsoft.utils.http.TipoAccion;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -25,7 +26,11 @@ public class ActualizacionService {
     }
 
     public boolean actualizarElemento(Elemento elemento, List<InstruccionResponse> instrucciones, String version) {
-        String rutaTemporal = descargaService.descargarArchivos(elemento, instrucciones, version);
+        String rutaTemporal = "";
+
+        if (!instrucciones.stream().allMatch(instr -> instr.getAccion() == TipoAccion.ELIMINAR)) {
+            rutaTemporal = descargaService.descargarArchivos(elemento, instrucciones, version);
+        }
 
         if (StringUtils.isBlank(rutaTemporal)) {
             return false;

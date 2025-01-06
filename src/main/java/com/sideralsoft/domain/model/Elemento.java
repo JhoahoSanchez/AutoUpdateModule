@@ -12,8 +12,6 @@ public class Elemento {
     private String nombre;
     @JsonProperty("version")
     private String version;
-    @JsonProperty("hash")
-    private String hash;
     @JsonProperty("ruta")
     private String ruta;
     @JsonProperty("tipo")
@@ -40,14 +38,6 @@ public class Elemento {
         this.version = version;
     }
 
-    public String getHash() {
-        return hash;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
-
     public String getRuta() {
         return ruta;
     }
@@ -72,14 +62,4 @@ public class Elemento {
         this.procesos = procesos;
     }
 
-    @Override
-    public String toString() {
-        return "Elemento{" +
-                "nombre='" + nombre + '\'' +
-                ", version='" + version + '\'' +
-                ", hash='" + hash + '\'' +
-                ", ruta='" + ruta + '\'' +
-                ", tipo=" + tipo +
-                '}';
-    }
 }

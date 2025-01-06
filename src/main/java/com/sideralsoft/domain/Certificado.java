@@ -2,6 +2,7 @@ package com.sideralsoft.domain;
 
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.service.CertificadoService;
+import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.exception.InstalacionException;
 import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
@@ -25,7 +26,7 @@ public class Certificado implements Actualizable, Instalable {
     }
 
     @Override
-    public void actualizar() {
+    public void actualizar() throws ActualizacionException {
         try {
             this.detenerProcesos();
             this.reemplazarElementos();
@@ -33,6 +34,7 @@ public class Certificado implements Actualizable, Instalable {
             this.iniciarProcesos();
         } catch (Exception e) {
             LOG.error("Ha ocurrido un error durante la actualizacion", e);
+            throw new ActualizacionException("Ha ocurrido un error durante la actualizacion", e);
         }
     }
 
@@ -41,7 +43,7 @@ public class Certificado implements Actualizable, Instalable {
     }
 
     @Override
-    public void reemplazarElementos() {
+    public void reemplazarElementos() throws ActualizacionException {
         this.certificadoService.actualizarCertificado(rutaDescarga, elemento.getNombre());
     }
 

@@ -8,12 +8,8 @@ public class InstruccionResponse {
 
     @JsonProperty("elemento")
     private String elemento;
-    @JsonProperty("rutaInstalacion")
-    private String rutaInstalacion;
-    @JsonProperty("rutaAPI")
-    private String rutaAPI; //TODO: Para amazon S3, se debe borrar
-    @JsonProperty("hash")
-    private String hash;
+    @JsonProperty("ruta")
+    private String ruta;
     @JsonProperty("accion")
     private TipoAccion accion;
 
@@ -25,20 +21,12 @@ public class InstruccionResponse {
         this.elemento = elemento;
     }
 
-    public String getRutaInstalacion() {
-        return rutaInstalacion;
+    public String getRuta() {
+        return ruta;
     }
 
-    public void setRutaInstalacion(String rutaInstalacion) {
-        this.rutaInstalacion = rutaInstalacion;
-    }
-
-    public String getRutaAPI() {
-        return rutaAPI;
-    }
-
-    public void setRutaAPI(String rutaAPI) {
-        this.rutaAPI = rutaAPI;
+    public void setRuta(String ruta) {
+        this.ruta = ruta;
     }
 
     public TipoAccion getAccion() {
@@ -47,24 +35,5 @@ public class InstruccionResponse {
 
     public void setAccion(TipoAccion accion) {
         this.accion = accion;
-    }
-
-    public String getHash() {
-        return hash;
-    }
-
-    public void setHash(String hash) {
-        this.hash = hash;
-    }
-
-    @Override
-    public String toString() {
-        return "InstruccionResponse{" +
-                "elemento='" + elemento + '\'' +
-                ", rutaInstalacion='" + rutaInstalacion + '\'' +
-                ", rutaAPI='" + rutaAPI + '\'' +
-                ", hash='" + hash + '\'' +
-                ", accion=" + accion +
-                '}';
     }
 }
