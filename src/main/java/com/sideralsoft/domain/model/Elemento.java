@@ -62,4 +62,14 @@ public class Elemento {
         this.procesos = procesos;
     }
 
+    @Override
+    public String toString() {
+        return "Elemento{" +
+                "nombre='" + nombre + '\'' +
+                ", version='" + version + '\'' +
+                ", ruta='" + ruta + '\'' +
+                ", tipo=" + tipo +
+                ", procesos=" + procesos +
+                '}';
+    }
 }

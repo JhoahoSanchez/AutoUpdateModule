@@ -162,10 +162,10 @@ public class Aplicacion implements Actualizable, Instalable {
             return;
         }
 
-        for (Proceso proceso : elemento.getProcesos()) {
-            Process startProcess = new ProcessBuilder(proceso.getRuta()).start();
+        for (Proceso proceso : elemento.getProcesos()) { //TODO: DIVIDIR ENTRE EJECUCION DE .EXE Y .JAR
+            Process iniciarProceso = new ProcessBuilder(proceso.getRuta()).start();
 
-            int exitCode = startProcess.waitFor();
+            int exitCode = iniciarProceso.waitFor();
 
             if (exitCode == 0) {
                 LOG.debug("El proceso {} fue iniciado exitosamente.", proceso.getNombre());
