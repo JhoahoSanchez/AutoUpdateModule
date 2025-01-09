@@ -57,4 +57,45 @@
             <version>2.18.0</version>
         </dependency>
     </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-jar-plugin</artifactId>
+                <version>3.4.2</version>
+                <configuration>
+                    <archive>
+                        <manifestEntries>
+                            <Main-Class>com.sideralsoft.Main</Main-Class>
+                        </manifestEntries>
+                    </archive>
+                </configuration>
+            </plugin>
+
+            <plugin>
+                <groupId>com.github.wvengen</groupId>
+                <artifactId>proguard-maven-plugin</artifactId>
+                <version>2.6.1</version>
+                <executions>
+                    <execution>
+                        <phase>package</phase>
+                        <goals><goal>proguard</goal></goals>
+                    </execution>
+                </executions>
+                <configuration>
+                    <obfuscate>true</obfuscate>
+                    <injar>${project.build.finalName}.jar</injar>
+                    <outjar>${project.build.finalName}-small.jar</outjar>
+                    <outputDirectory>${project.build.directory}</outputDirectory>
+                    <proguardInclude>${project.basedir}/proguard.conf</proguardInclude>
+                    <libs>
+                        <lib>${java.home}/jmods</lib>
+                    </libs>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
 </project>

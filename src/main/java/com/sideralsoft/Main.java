@@ -9,6 +9,7 @@ import java.util.concurrent.Executors;
 public class Main {
     public static void main(String[] args) {
         try (ExecutorService executor = Executors.newFixedThreadPool(2)) {
+
             executor.submit(() -> {
                 SchedulerService schedulerService = new SchedulerService();
                 schedulerService.generarProcesoActualizacion();
@@ -18,22 +19,15 @@ public class Main {
                 SparkConfig.getInstance();
             });
 
+            try {
+                System.out.println("Press Ctrl+C to stop the application.");
+                Thread.currentThread().join();
+            } catch (InterruptedException e) {
+                Thread.currentThread().interrupt();
+            }
+
             executor.shutdown();
+            System.out.println("Application finished.");
         }
-
-        /*
-        TODO:
-        - VER LA MANERA DE AGREGAR LOS PROCESOS A EL APPCONFIG /BASE DE DATOS SQLITE
-        - Implementar proguard
-
-        -keep public class com.miapp.Main {
-    public static void main(java.lang.String[]);
-}
--dontwarn
-
-
-        - REALIZAR PRUEBAS DE autoactualizacion
-
-         */
     }
 }
