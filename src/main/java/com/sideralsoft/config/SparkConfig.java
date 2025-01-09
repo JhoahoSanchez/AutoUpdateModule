@@ -1,11 +1,14 @@
 package com.sideralsoft.config;
 
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.domain.model.Proceso;
 import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.service.ActualizacionService;
 import com.sideralsoft.service.ConsultaService;
 import com.sideralsoft.service.InstalacionService;
 import com.sideralsoft.utils.ElementosSingleton;
+import com.sideralsoft.utils.JsonUtils;
+import com.sideralsoft.utils.http.InstalacionResponse;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -15,6 +18,7 @@ import spark.Spark;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.ArrayList;
 import java.util.List;
 
 import static spark.Spark.get;
@@ -78,9 +82,11 @@ public class SparkConfig {
                     return "Ya existe una instalacion de " + nombre;
                 }
 
-                String version = consultaService.existeInstalacionDisponible(nombre);
+                InstalacionResponse instalacionDisponible = consultaService.existeInstalacionDisponible(nombre);
 
-                if (StringUtils.isBlank(version)) {
+                LOG.debug("Instalacion disponible: " + JsonUtils.toJson(instalacionDisponible));
+
+                if (instalacionDisponible == null) {
                     res.status(500);
                     return "Ha ocurrido un error durante la consulta de " + nombre + ", revise el log";
                 }
@@ -88,11 +94,24 @@ public class SparkConfig {
                 Elemento elemento = new Elemento();
                 elemento.setNombre(nombre);
                 elemento.setTipo(tipo);
-                elemento.setVersion(version);
 
                 if (tipo.equals(TipoElemento.APLICACION)) {
                     elemento.setRuta(ApplicationProperties.getProperty("app.config.storage.rutaInstalacion") + "\\" + nombre);
                     Path rutaInstalacion = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaInstalacion"), nombre);
+
+                    if (instalacionDisponible.getProcesos() != null) {
+                        List<Proceso> procesos = new ArrayList<>();
+
+                        for (Proceso proceso : instalacionDisponible.getProcesos()) {
+                            procesos.add(
+                                    new Proceso(proceso.getNombre(),
+                                            Paths.get(elemento.getRuta(), proceso.getRuta()).toString()
+                                    )
+                            );
+                        }
+
+                        elemento.setProcesos(procesos);
+                    }
 
                     if (!Files.exists(rutaInstalacion)) {
                         if (!rutaInstalacion.toFile().mkdirs()) {
@@ -103,12 +122,12 @@ public class SparkConfig {
                     elemento.setRuta(rutaInstalacion.toFile().getAbsolutePath());
                 }
 
-                if (!instalacionService.instalarElemento(elemento, version)) {
+                if (!instalacionService.instalarElemento(elemento, instalacionDisponible.getVersion())) {
                     res.status(500);
                     return "Ha ocurrido un error durante la instalacion.";
                 }
 
-                elemento.setVersion(version);
+                elemento.setVersion(instalacionDisponible.getVersion());
 
                 List<Elemento> elementos = ElementosSingleton.getInstance().obtenerElementos();
                 elementos.add(elemento);
@@ -116,7 +135,7 @@ public class SparkConfig {
                 ElementosSingleton.getInstance().actualizarArchivoElementos(elementos);
                 ElementosSingleton.getInstance().obtenerElementos();
 
-                return elemento.getNombre() + " ha sido instalado exitosamente a la version " + elemento.getVersion();
+                return elemento.getNombre() + " ha sido instalado exitosamente en la version " + elemento.getVersion();
             } catch (Exception e) {
                 LOG.error("Error general al intentar instalar los elementos: ", e);
                 res.status(500);

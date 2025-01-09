@@ -11,6 +11,14 @@ public class Proceso {
     @JsonProperty("ruta")
     private String ruta;
 
+    public Proceso() {
+    }
+
+    public Proceso(String nombre, String ruta) {
+        this.nombre = nombre;
+        this.ruta = ruta;
+    }
+
     public String getNombre() {
         return nombre;
     }

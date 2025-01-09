@@ -6,6 +6,7 @@ import com.sideralsoft.utils.JsonUtils;
 import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.exception.InstalacionException;
 import com.sideralsoft.utils.http.ActualizacionResponse;
+import com.sideralsoft.utils.http.InstalacionResponse;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,13 +40,19 @@ public class ConsultaService {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
-            if (response.statusCode() == 204) {
-                LOG.debug("No existen nuevas versiones disponibles");
-                return null;
+            if (response.statusCode() == 500) {
+                LOG.debug("Ha ocurrido un error en el servidor al consultar nuevas versiones para " + elemento.getNombre());
+                throw new ActualizacionException("Error en el servidor");
             }
 
             if (response.statusCode() == 200) {
                 ActualizacionResponse actualizacionResponse = JsonUtils.fromJson(response.body(), ActualizacionResponse.class);
+
+                if (!actualizacionResponse.isActualizable()) {
+                    LOG.debug("No existen nuevas versiones disponibles para " + elemento.getNombre());
+                    return null;
+                }
+
                 LOG.debug("Existe una nueva versión del elemento {} a la version {}", elemento.getNombre(), actualizacionResponse.getVersion());
                 return actualizacionResponse.getVersion();
             }
@@ -56,12 +63,10 @@ public class ConsultaService {
         return null;
     }
 
-    public String existeInstalacionDisponible(String nombre) throws InstalacionException {
+    public InstalacionResponse existeInstalacionDisponible(String nombre) throws InstalacionException {
         String nombreTratado = URLEncoder.encode(nombre, StandardCharsets.UTF_8);
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/buscar-recurso";
-        String urlConParametros = String.format("%s?nombre=%s", baseUrl, nombreTratado);
-
-        LOG.debug(urlConParametros);
+        String urlConParametros = String.format("%s?nombre=%s&incluir=%s", baseUrl, nombreTratado, "procesos");
 
         try {
             HttpClient client = HttpClient.newHttpClient();
@@ -74,14 +79,18 @@ public class ConsultaService {
 
             HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
 
+            LOG.debug("Respuesta de la consulta: " + response.body());
+
+            InstalacionResponse instalacionResponse = JsonUtils.fromJson(response.body(), InstalacionResponse.class);
+
             if (response.statusCode() != 200) {
-                LOG.debug("Ha ocurrido un error al intentar consultar la API: " + response.body());
+                LOG.debug("Ha ocurrido un error al intentar consultar la API, " + instalacionResponse.getMensaje());
                 return null;
             }
 
-            ActualizacionResponse actualizacionResponse = JsonUtils.fromJson(response.body(), ActualizacionResponse.class);
-            LOG.debug("Se ha encontrado el elemento {} con la version {}", nombreTratado, actualizacionResponse.getVersion());
-            return actualizacionResponse.getVersion();
+
+            LOG.debug("Se ha encontrado el elemento {} con la version {}", nombreTratado, instalacionResponse.getVersion());
+            return instalacionResponse;
         } catch (Exception e) {
             LOG.error("Error al consultar la API.", e);
             throw new InstalacionException("Error al consultar la API", e);

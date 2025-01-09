@@ -11,8 +11,10 @@ import org.apache.commons.io.FileUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.nio.file.*;
 import java.nio.file.attribute.BasicFileAttributes;
 import java.util.List;
@@ -71,6 +73,13 @@ public class Aplicacion implements Actualizable, Instalable {
         }
 
         for (Proceso proceso : elemento.getProcesos()) {
+            boolean enEjecucion = procesoEnEjecucion(proceso.getNombre());
+
+            if (!enEjecucion) {
+                LOG.debug("El proceso {} no está en ejecución. No es necesario detenerlo.", proceso.getNombre());
+                continue;
+            }
+
             ProcessBuilder processBuilder = new ProcessBuilder("taskkill", "/F", "/IM", proceso.getNombre());
             Process process = processBuilder.start();
 
@@ -162,16 +171,13 @@ public class Aplicacion implements Actualizable, Instalable {
             return;
         }
 
-        for (Proceso proceso : elemento.getProcesos()) { //TODO: DIVIDIR ENTRE EJECUCION DE .EXE Y .JAR
-            Process iniciarProceso = new ProcessBuilder(proceso.getRuta()).start();
-
-            int exitCode = iniciarProceso.waitFor();
-
-            if (exitCode == 0) {
+        for (Proceso proceso : elemento.getProcesos()) {
+            try {
+                Process iniciarProceso = new ProcessBuilder(proceso.getRuta()).start();
                 LOG.debug("El proceso {} fue iniciado exitosamente.", proceso.getNombre());
-            } else {
-                LOG.debug("No se pudo iniciar el proceso {}. Código de salida: {}", proceso.getNombre(), exitCode);
-                throw new ActualizacionException("No se pudo iniciar el proceso " + proceso.getNombre() + ". Código de salida: " + exitCode);
+            } catch (IOException e) {
+                LOG.error("Error al iniciar el proceso {}: {}", proceso.getNombre(), e.getMessage());
+                throw new ActualizacionException("No se pudo iniciar el proceso " + proceso.getNombre(), e);
             }
         }
     }
@@ -205,5 +211,26 @@ public class Aplicacion implements Actualizable, Instalable {
         } finally {
             this.borrarArchivosTemporales();
         }
+    }
+
+    private boolean procesoEnEjecucion(String nombreProceso) throws IOException, InterruptedException {
+        ProcessBuilder processBuilder = new ProcessBuilder("tasklist", "/FI", "IMAGENAME eq " + nombreProceso);
+        Process process = processBuilder.start();
+        int exitCode = process.waitFor();
+
+        if (exitCode != 0) {
+            throw new IOException("Error al verificar si el proceso está en ejecución: " + nombreProceso);
+        }
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(nombreProceso)) {
+                    return true;
+                }
+            }
+        }
+
+        return false;
     }
 }

@@ -23,9 +23,16 @@ public class Main {
 
         /*
         TODO:
-        - VER LA MANERA DE AGREGAR LOS PROCESOS A EL APPCONFIG /BASE DE DATOS
-        - REALIZAR PRUEBAS DE TODOS LOS COMPONENTES //4/6
+        - VER LA MANERA DE AGREGAR LOS PROCESOS A EL APPCONFIG /BASE DE DATOS SQLITE
+        - Implementar proguard
 
+        -keep public class com.miapp.Main {
+    public static void main(java.lang.String[]);
+}
+-dontwarn
+
+
+        - REALIZAR PRUEBAS DE autoactualizacion
 
          */
     }
