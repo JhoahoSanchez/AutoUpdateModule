@@ -20,7 +20,7 @@ POST http://localhost:5500/install?nombre=orion-print-serve&tipo=APLICACION
 
 ### Intenta actualizar un elemento desactualizado
 
-POST http://localhost:5500/update?nombre=interfaz-hpas
+POST http://localhost:5500/update?nombre=notepad-pp
 
 ### Intenta actualizar un elemento desactualizado (CERTIFICADO)
 
