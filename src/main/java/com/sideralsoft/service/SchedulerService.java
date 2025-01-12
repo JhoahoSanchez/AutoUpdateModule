@@ -3,6 +3,7 @@ package com.sideralsoft.service;
 import com.sideralsoft.config.SparkConfig;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.utils.ElementosSingleton;
+import com.sideralsoft.utils.http.ApiClientImpl;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -27,8 +28,8 @@ public class SchedulerService {
     public SchedulerService() {
         SparkConfig.getInstance();
         this.elementosSingleton = ElementosSingleton.getInstance();
-        this.actualizacionService = new ActualizacionService();
-        this.consultaService = new ConsultaService();
+        this.actualizacionService = new ActualizacionService(new DescargaService(new ApiClientImpl<>()));
+        this.consultaService = new ConsultaService(new ApiClientImpl<>());
         this.scheduler = Executors.newScheduledThreadPool(1);
     }
 

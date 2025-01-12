@@ -21,8 +21,8 @@ public class ActualizacionService {
 
     private final DescargaService descargaService;
 
-    public ActualizacionService() {
-        this.descargaService = new DescargaService();
+    public ActualizacionService(DescargaService descargaService) {
+        this.descargaService = descargaService;
     }
 
     public boolean actualizarElemento(Elemento elemento, List<InstruccionResponse> instrucciones, String version) {

@@ -5,9 +5,11 @@ import com.sideralsoft.domain.model.Proceso;
 import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.service.ActualizacionService;
 import com.sideralsoft.service.ConsultaService;
+import com.sideralsoft.service.DescargaService;
 import com.sideralsoft.service.InstalacionService;
 import com.sideralsoft.utils.ElementosSingleton;
 import com.sideralsoft.utils.JsonUtils;
+import com.sideralsoft.utils.http.ApiClientImpl;
 import com.sideralsoft.utils.http.InstalacionResponse;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.apache.commons.lang3.StringUtils;
@@ -34,8 +36,8 @@ public class SparkConfig {
     private final InstalacionService instalacionService;
 
     private SparkConfig() {
-        consultaService = new ConsultaService();
-        actualizacionService = new ActualizacionService();
+        consultaService = new ConsultaService(new ApiClientImpl<>());
+        actualizacionService = new ActualizacionService(new DescargaService(new ApiClientImpl<>()));
         instalacionService = new InstalacionService();
 
         configurarSpark();

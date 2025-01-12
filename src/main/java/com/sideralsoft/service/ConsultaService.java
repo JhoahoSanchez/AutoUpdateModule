@@ -6,15 +6,13 @@ import com.sideralsoft.utils.JsonUtils;
 import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.exception.InstalacionException;
 import com.sideralsoft.utils.http.ActualizacionResponse;
+import com.sideralsoft.utils.http.ApiClient;
 import com.sideralsoft.utils.http.InstalacionResponse;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
-import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
-import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
 import java.util.List;
@@ -23,6 +21,12 @@ public class ConsultaService {
 
     private static final Logger LOG = LoggerFactory.getLogger(ConsultaService.class);
 
+    private final ApiClient<String> apiClient;
+
+    public ConsultaService(ApiClient<String> apiClient) {
+        this.apiClient = apiClient;
+    }
+
     public String existeActualizacionDisponible(Elemento elemento) throws ActualizacionException {
         String nombre = URLEncoder.encode(elemento.getNombre(), StandardCharsets.UTF_8);
         String version = URLEncoder.encode(elemento.getVersion(), StandardCharsets.UTF_8);
@@ -30,15 +34,7 @@ public class ConsultaService {
         String urlConParametros = String.format("%s?nombre=%s&version=%s", baseUrl, nombre, version);
 
         try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(urlConParametros))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + ApplicationProperties.getProperty("api.token"))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = apiClient.enviarPeticionGet(urlConParametros, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 500) {
                 LOG.debug("Ha ocurrido un error en el servidor al consultar nuevas versiones para " + elemento.getNombre());
@@ -69,15 +65,7 @@ public class ConsultaService {
         String urlConParametros = String.format("%s?nombre=%s&incluir=%s", baseUrl, nombreTratado, "procesos");
 
         try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(urlConParametros))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + ApplicationProperties.getProperty("api.token"))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = apiClient.enviarPeticionGet(urlConParametros, HttpResponse.BodyHandlers.ofString());
 
             LOG.debug("Respuesta de la consulta: " + response.body());
 
@@ -105,15 +93,7 @@ public class ConsultaService {
         String urlConParametros = String.format("%s?nombre=%s&versionActual=%s&versionActualizable=%s", baseUrl, nombre, versionActual, versionActualizable);
 
         try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(urlConParametros))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + ApplicationProperties.getProperty("api.token"))
-                    .GET()
-                    .build();
-
-            HttpResponse<String> response = client.send(request, HttpResponse.BodyHandlers.ofString());
+            HttpResponse<String> response = apiClient.enviarPeticionGet(urlConParametros, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 200) {
                 return JsonUtils.fromJsonToList(response.body(), InstruccionResponse.class);

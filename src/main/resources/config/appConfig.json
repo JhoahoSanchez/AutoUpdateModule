@@ -1,34 +1,42 @@
-[ {
-  "nombre" : "interfaz-hormolab",
-  "version" : "2.0.0",
-  "ruta" : "D:\\Universidad\\Tesis\\Instalaciones\\interfaz-hormolab",
-  "tipo" : "APLICACION",
-  "proceso" : null
-}, {
-  "nombre" : "interfaz-hpas",
-  "version" : "2.0.1",
-  "ruta" : "D:\\Universidad\\Tesis\\Instalaciones\\interfaz-hpas",
-  "tipo" : "APLICACION",
-  "proceso" : null
-}, {
-  "nombre" : "Sideralsoft",
-  "version" : "1.0.2",
-  "ruta" : null,
-  "tipo" : "CERTIFICADO",
-  "proceso" : null
-}, {
-  "nombre" : "pattern-matcher",
-  "version" : "1.0.0",
-  "ruta" : "D:\\Universidad\\Tesis\\Instalaciones\\pattern-matcher",
-  "tipo" : "APLICACION",
-  "proceso" : null
-}, {
-  "nombre" : "notepad-pp",
-  "version" : "8.8.0",
-  "ruta" : "D:\\Universidad\\Tesis\\Instalaciones\\notepad-pp",
-  "tipo" : "APLICACION",
-  "proceso" : [ {
-    "nombre" : "notepad++.exe",
-    "ruta" : "D:\\Universidad\\Tesis\\Instalaciones\\notepad-pp\\notepad++.exe"
-  } ]
-} ]
+[
+  {
+    "nombre": "interfaz-hormolab",
+    "version": "2.0.0",
+    "ruta": "D:\\Universidad\\Tesis\\Instalaciones\\interfaz-hormolab",
+    "tipo": "APLICACION",
+    "proceso": null
+  },
+  {
+    "nombre": "interfaz-hpas",
+    "version": "2.0.1",
+    "ruta": "D:\\Universidad\\Tesis\\Instalaciones\\interfaz-hpas",
+    "tipo": "APLICACION",
+    "proceso": null
+  },
+  {
+    "nombre": "Sideralsoft",
+    "version": "1.0.2",
+    "ruta": null,
+    "tipo": "CERTIFICADO",
+    "proceso": null
+  },
+  {
+    "nombre": "pattern-matcher",
+    "version": "1.0.0",
+    "ruta": "D:\\Universidad\\Tesis\\Instalaciones\\pattern-matcher",
+    "tipo": "APLICACION",
+    "proceso": null
+  },
+  {
+    "nombre": "notepad-pp",
+    "version": "8.8.0",
+    "ruta": "D:\\Universidad\\Tesis\\Instalaciones\\notepad-pp",
+    "tipo": "APLICACION",
+    "proceso": [
+      {
+        "nombre": "notepad++.exe",
+        "ruta": "D:\\Universidad\\Tesis\\Instalaciones\\notepad-pp\\notepad++.exe"
+      }
+    ]
+  }
+]

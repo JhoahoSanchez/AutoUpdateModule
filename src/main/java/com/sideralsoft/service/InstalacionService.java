@@ -6,9 +6,12 @@ import com.sideralsoft.domain.Instalable;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.utils.exception.InstalacionException;
+import com.sideralsoft.utils.http.ApiClientImpl;
 import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.InputStream;
 
 public class InstalacionService {
 
@@ -17,7 +20,7 @@ public class InstalacionService {
     private final DescargaService descargaService;
 
     public InstalacionService() {
-        descargaService = new DescargaService();
+        descargaService = new DescargaService(new ApiClientImpl<InputStream>());
     }
 
     public boolean instalarElemento(Elemento elemento, String version) {

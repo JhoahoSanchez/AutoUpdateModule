@@ -1,18 +1,16 @@
 package com.sideralsoft.service;
 
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.sideralsoft.config.ApplicationProperties;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.utils.JsonUtils;
 import com.sideralsoft.utils.http.ActualizacionRequest;
+import com.sideralsoft.utils.http.ApiClient;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import java.io.*;
-import java.net.URI;
 import java.net.URLEncoder;
-import java.net.http.HttpClient;
 import java.net.http.HttpRequest;
 import java.net.http.HttpResponse;
 import java.nio.charset.StandardCharsets;
@@ -29,6 +27,12 @@ public class DescargaService {
 
     private static final Logger LOG = LoggerFactory.getLogger(DescargaService.class);
 
+    private final ApiClient<InputStream> apiClient;
+
+    public DescargaService(ApiClient<InputStream> apiClient) {
+        this.apiClient = apiClient;
+    }
+
     public String descargarArchivos(Elemento elemento, String version) {
         String rutaTemporal = null;
 
@@ -38,15 +42,7 @@ public class DescargaService {
         String urlConParametros = String.format("%s?nombre=%s&ultimaVersion=%s", baseUrl, nombre, versionActualizable);
 
         try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(urlConParametros))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + ApplicationProperties.getProperty("api.token"))
-                    .GET()
-                    .build();
-
-            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            HttpResponse<InputStream> response = apiClient.enviarPeticionGet(urlConParametros, HttpResponse.BodyHandlers.ofInputStream());
 
             if (response.statusCode() != 200) {
                 LOG.debug("No se ha encontrado el elemento a descargar." + response.statusCode());
@@ -93,21 +89,11 @@ public class DescargaService {
         actualizacionRequest.setInstrucciones(instrucciones);
 
         try {
-            LOG.debug(JsonUtils.toJson(actualizacionRequest));
-        } catch (JsonProcessingException e) {
-
-        }
-
-        try {
-            HttpClient client = HttpClient.newHttpClient();
-            HttpRequest request = HttpRequest.newBuilder()
-                    .uri(new URI(baseUrl))
-                    .header("Content-Type", "application/json")
-                    .header("Authorization", "Bearer " + ApplicationProperties.getProperty("api.token"))
-                    .POST(HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(actualizacionRequest)))
-                    .build();
-
-            HttpResponse<InputStream> response = client.send(request, HttpResponse.BodyHandlers.ofInputStream());
+            HttpResponse<InputStream> response = apiClient.enviarPeticionPost(
+                    baseUrl,
+                    HttpRequest.BodyPublishers.ofString(JsonUtils.toJson(actualizacionRequest)),
+                    HttpResponse.BodyHandlers.ofInputStream()
+            );
 
             if (response.statusCode() != 200) {
                 LOG.debug("No se ha encontrado el elemento a descargar." + response.statusCode());
