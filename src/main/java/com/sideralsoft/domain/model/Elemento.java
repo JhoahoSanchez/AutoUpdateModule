@@ -22,6 +22,11 @@ public class Elemento {
     public Elemento() {
     }
 
+    public Elemento(String nombre, String version) {
+        this.nombre = nombre;
+        this.version = version;
+    }
+
     public String getNombre() {
         return nombre;
     }
