@@ -12,23 +12,24 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-public class MockApiClient<T> implements ApiClient<T> {
+public class MockApiClient implements ApiClient<String> {
 
-    private final Map<String, T> mockedResponses = new HashMap<>();
+    private final Map<String, String> mockedResponses = new HashMap<>();
 
-    public void addMockResponse(String request, T response) {
+    public void addMockResponse(String request, String response) {
         mockedResponses.put(request, response);
     }
 
     @Override
-    public HttpResponse<T> enviarPeticionGet(String url, HttpResponse.BodyHandler<T> bodyHandler) throws Exception {
+    public HttpResponse<String> enviarPeticionGet(String url, HttpResponse.BodyHandler<String> bodyHandler) throws Exception {
         if (!mockedResponses.containsKey(url)) {
             throw new RuntimeException("URL no mapeada en el mock: " + url);
         }
-        return new HttpResponse<T>() {
+
+        return new HttpResponse<String>() {
             @Override
             public int statusCode() {
-                return 200; // Simula éxito
+                return 200;
             }
 
             @Override
@@ -37,7 +38,7 @@ public class MockApiClient<T> implements ApiClient<T> {
             }
 
             @Override
-            public Optional<HttpResponse<T>> previousResponse() {
+            public Optional<HttpResponse<String>> previousResponse() {
                 return Optional.empty();
             }
 
@@ -47,7 +48,7 @@ public class MockApiClient<T> implements ApiClient<T> {
             }
 
             @Override
-            public T body() {
+            public String body() {
                 return mockedResponses.get(url);
             }
 
@@ -69,7 +70,50 @@ public class MockApiClient<T> implements ApiClient<T> {
     }
 
     @Override
-    public HttpResponse<T> enviarPeticionPost(String url, HttpRequest.BodyPublisher bodyPublisher, HttpResponse.BodyHandler<T> bodyHandler) throws Exception {
-        return null;
+    public HttpResponse<String> enviarPeticionPost(String url, HttpRequest.BodyPublisher bodyPublisher, HttpResponse.BodyHandler<String> bodyHandler) throws Exception {
+        if (!mockedResponses.containsKey(url)) {
+            throw new RuntimeException("URL no mapeada en el mock: " + url);
+        }
+        return new HttpResponse<String>() {
+            @Override
+            public int statusCode() {
+                return 200;
+            }
+
+            @Override
+            public HttpRequest request() {
+                return null;
+            }
+
+            @Override
+            public Optional<HttpResponse<String>> previousResponse() {
+                return Optional.empty();
+            }
+
+            @Override
+            public HttpHeaders headers() {
+                return null;
+            }
+
+            @Override
+            public String body() {
+                return mockedResponses.get(url);
+            }
+
+            @Override
+            public Optional<SSLSession> sslSession() {
+                return Optional.empty();
+            }
+
+            @Override
+            public URI uri() {
+                return null;
+            }
+
+            @Override
+            public HttpClient.Version version() {
+                return null;
+            }
+        };
     }
 }

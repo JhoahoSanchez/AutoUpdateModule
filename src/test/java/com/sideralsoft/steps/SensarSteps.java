@@ -17,11 +17,11 @@ import java.util.Map;
 
 public class SensarSteps {
 
-    private final MockApiClient<String> mockApiClient;
+    private final MockApiClient mockApiClient;
     private final List<String> respuestas;
 
     public SensarSteps() {
-        mockApiClient = new MockApiClient<>();
+        mockApiClient = new MockApiClient();
         respuestas = new ArrayList<>();
     }
 
