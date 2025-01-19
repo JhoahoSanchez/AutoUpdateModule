@@ -1,9 +1,6 @@
 package com.sideralsoft.service;
 
-import com.sideralsoft.domain.Actualizable;
-import com.sideralsoft.domain.Aplicacion;
-import com.sideralsoft.domain.Certificado;
-import com.sideralsoft.domain.GestorActualizaciones;
+import com.sideralsoft.domain.*;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.utils.exception.ActualizacionException;
@@ -40,6 +37,12 @@ public class ActualizacionService {
             Actualizable actualizable;
             if (elemento.getTipo().equals(TipoElemento.APLICACION)) {
                 actualizable = new Aplicacion(elemento, rutaTemporal, instrucciones);
+                actualizable.actualizar();
+                return true;
+            }
+
+            if (elemento.getTipo().equals(TipoElemento.INSTALADOR)) {
+                actualizable = new Instalador(elemento, rutaTemporal);
                 actualizable.actualizar();
                 return true;
             }

@@ -18,6 +18,8 @@ public class Elemento {
     private TipoElemento tipo;
     @JsonProperty("proceso")
     private List<Proceso> procesos;
+    @JsonProperty("dependencias")
+    private List<Dependencia> dependencias;
 
     public Elemento() {
     }
@@ -67,6 +69,14 @@ public class Elemento {
         this.procesos = procesos;
     }
 
+    public List<Dependencia> getDependencias() {
+        return dependencias;
+    }
+
+    public void setDependencias(List<Dependencia> dependencias) {
+        this.dependencias = dependencias;
+    }
+
     @Override
     public String toString() {
         return "Elemento{" +
@@ -75,6 +85,7 @@ public class Elemento {
                 ", ruta='" + ruta + '\'' +
                 ", tipo=" + tipo +
                 ", procesos=" + procesos +
+                ", dependencias=" + dependencias +
                 '}';
     }
 }
