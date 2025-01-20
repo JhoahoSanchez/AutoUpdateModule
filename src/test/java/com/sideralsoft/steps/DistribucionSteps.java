@@ -1,10 +1,8 @@
 package com.sideralsoft.steps;
 
 import com.sideralsoft.domain.model.Elemento;
-import com.sideralsoft.service.ActualizacionService;
 import com.sideralsoft.service.DescargaService;
 import com.sideralsoft.utils.ElementosSingleton;
-import com.sideralsoft.utils.MockApiClient;
 import com.sideralsoft.utils.MockApiClientDescarga;
 import io.cucumber.datatable.DataTable;
 import io.cucumber.java.en.Given;
@@ -12,7 +10,6 @@ import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 
 import java.io.IOException;
-import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -50,8 +47,8 @@ public class DistribucionSteps {
 
     @When("se descarga el archivo y se descomprime en una carpeta temporal")
     public void seDescargaElArchivoYSeDescomprimeEnUnaCarpetaTemporal() throws Exception {
-        for (Elemento elemento: elementosActualizables) {
-            rutasArchivosDescargados.add(descargaService.descargarArchivos(elemento,elemento.getVersion()));
+        for (Elemento elemento : elementosActualizables) {
+            rutasArchivosDescargados.add(descargaService.descargarArchivos(elemento.getNombre(), elemento.getVersion(), elemento.getTipo()));
         }
     }
 

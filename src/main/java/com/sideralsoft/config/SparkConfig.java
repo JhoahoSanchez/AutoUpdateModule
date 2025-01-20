@@ -1,5 +1,6 @@
 package com.sideralsoft.config;
 
+import com.sideralsoft.domain.model.Dependencia;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.Proceso;
 import com.sideralsoft.domain.model.TipoElemento;
@@ -76,6 +77,8 @@ public class SparkConfig {
             res.type("text/plain");
 
             try {
+                //EX: appmanager install interfaz-hl7 --type=APLICACION
+                //EX: appmanager install interfaz-hl7 --type=APLICACION --dependency=estrategia-jhoaho
                 String nombre = req.queryParams("nombre");
                 TipoElemento tipo = TipoElemento.valueOf(req.queryParams("tipo"));
 
@@ -84,14 +87,14 @@ public class SparkConfig {
                     return "Ya existe una instalacion de " + nombre;
                 }
 
-                InstalacionResponse instalacionDisponible = consultaService.existeInstalacionDisponible(nombre);
-
-                LOG.debug("Instalacion disponible: " + JsonUtils.toJson(instalacionDisponible));
+                InstalacionResponse instalacionDisponible = consultaService.existeInstalacionDisponible(nombre, tipo);
 
                 if (instalacionDisponible == null) {
                     res.status(500);
                     return "Ha ocurrido un error durante la consulta de " + nombre + ", revise el log";
                 }
+
+                LOG.debug("Instalacion disponible: " + JsonUtils.toJson(instalacionDisponible));
 
                 Elemento elemento = new Elemento();
                 elemento.setNombre(nombre);
@@ -124,7 +127,7 @@ public class SparkConfig {
                     elemento.setRuta(rutaInstalacion.toFile().getAbsolutePath());
                 }
 
-                if (!instalacionService.instalarElemento(elemento, instalacionDisponible.getVersion())) {
+                if (!instalacionService.instalarElemento(elemento, instalacionDisponible.getVersion(), null)) {
                     res.status(500);
                     return "Ha ocurrido un error durante la instalacion.";
                 }
@@ -145,6 +148,82 @@ public class SparkConfig {
             }
         });
 
+        post("install/dependency", (req, res) -> {
+            res.type("text/plain");
+
+            try {
+                String nombreAplicacion = req.queryParams("nombre");
+                TipoElemento tipo = TipoElemento.valueOf(req.queryParams("tipo"));
+                String nombreDependencia = req.queryParams("dependencia");
+
+                Elemento elemento = ElementosSingleton.getInstance().obtenerElemento(nombreAplicacion);
+
+                if (elemento == null) {
+                    res.status(404);
+                    return "No se ha encontrado una instalacion de " + nombreAplicacion;
+                }
+
+                if (elemento.getDependencias().stream().anyMatch(d -> d.getNombre().equals(nombreDependencia))) {
+                    res.status(500);
+                    return "Ya existe una instalacion de " + nombreDependencia;
+                }
+
+                InstalacionResponse instalacionDisponible = consultaService.existeInstalacionDisponible(nombreAplicacion, tipo);
+
+                if (instalacionDisponible == null) {
+                    res.status(500);
+                    return "Ha ocurrido un error durante la consulta de " + nombreDependencia + ", revise el log";
+                }
+
+                LOG.debug("Instalacion disponible: " + JsonUtils.toJson(instalacionDisponible));
+
+                Dependencia dependencia = new Dependencia();
+                dependencia.setNombre(nombreDependencia);
+                dependencia.setVersion(instalacionDisponible.getVersion());
+
+                Path rutaInstalacion = Paths.get(elemento.getRuta(), "lib");
+
+                if (!Files.exists(rutaInstalacion)) {
+                    if (!rutaInstalacion.toFile().mkdirs()) {
+                        res.status(500);
+                        return "Error al crear los directorios de instalacion";
+                    }
+                }
+                dependencia.setRuta(rutaInstalacion.toFile().getAbsolutePath());
+
+                if (!instalacionService.instalarElemento(elemento, instalacionDisponible.getVersion(), dependencia)) {
+                    res.status(500);
+                    return "Ha ocurrido un error durante la instalacion.";
+                }
+
+                if (elemento.getDependencias() == null) {
+                    elemento.setDependencias(List.of(dependencia));
+                } else {
+                    elemento.getDependencias().add(dependencia);
+                }
+
+                List<Elemento> elementos = ElementosSingleton.getInstance().obtenerElementos();
+
+                elementos
+                        .stream()
+                        .filter(e -> e.getNombre().equals(nombreAplicacion))
+                        .findFirst()
+                        .ifPresent(p -> {
+                            int index = elementos.indexOf(p);
+                            elementos.set(index, elemento);
+                        });
+
+                ElementosSingleton.getInstance().actualizarArchivoElementos(elementos);
+                ElementosSingleton.getInstance().obtenerElementos();
+
+                return dependencia.getNombre() + " ha sido instalado exitosamente en la version " + dependencia.getVersion();
+            } catch (Exception e) {
+                LOG.error("Error general al intentar instalar los elementos: ", e);
+                res.status(500);
+                return "Error al intentar instalar los elementos";
+            }
+        });
+
         post("update", (req, res) -> {
             res.type("text/plain");
 
@@ -155,7 +234,7 @@ public class SparkConfig {
             }
 
             try {
-                String version = consultaService.existeActualizacionDisponible(elemento);
+                String version = consultaService.existeActualizacionDisponible(elemento.getNombre(), elemento.getVersion(), elemento.getTipo());
 
                 if (StringUtils.isBlank(version)) {
                     res.status(204);

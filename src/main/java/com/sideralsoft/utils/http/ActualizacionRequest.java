@@ -2,6 +2,7 @@ package com.sideralsoft.utils.http;
 
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import com.sideralsoft.domain.model.TipoElemento;
 
 import java.util.List;
 
@@ -12,6 +13,8 @@ public class ActualizacionRequest {
     private String nombre;
     @JsonProperty("version")
     private String version;
+    @JsonProperty("tipo")
+    private TipoElemento tipo;
     @JsonProperty("instrucciones")
     private List<InstruccionResponse> instrucciones;
 
@@ -29,6 +32,14 @@ public class ActualizacionRequest {
 
     public void setVersion(String version) {
         this.version = version;
+    }
+
+    public TipoElemento getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(TipoElemento tipo) {
+        this.tipo = tipo;
     }
 
     public List<InstruccionResponse> getInstrucciones() {

@@ -2,6 +2,7 @@ package com.sideralsoft.service;
 
 import com.sideralsoft.config.ApplicationProperties;
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.utils.JsonUtils;
 import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.exception.InstalacionException;
@@ -27,17 +28,17 @@ public class ConsultaService {
         this.apiClient = apiClient;
     }
 
-    public String existeActualizacionDisponible(Elemento elemento) throws ActualizacionException {
-        String nombre = URLEncoder.encode(elemento.getNombre(), StandardCharsets.UTF_8);
-        String version = URLEncoder.encode(elemento.getVersion(), StandardCharsets.UTF_8);
+    public String existeActualizacionDisponible(String nombre, String version, TipoElemento tipo) throws ActualizacionException {
+        String nombreTratado = URLEncoder.encode(nombre, StandardCharsets.UTF_8);
+        String versionTratada = URLEncoder.encode(version, StandardCharsets.UTF_8);
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/buscar-actualizacion";
-        String urlConParametros = String.format("%s?nombre=%s&version=%s", baseUrl, nombre, version);
+        String urlConParametros = String.format("%s?nombre=%s&version=%s&tipo=%s", baseUrl, nombreTratado, versionTratada, tipo.toString());
 
         try {
             HttpResponse<String> response = apiClient.enviarPeticionGet(urlConParametros, HttpResponse.BodyHandlers.ofString());
 
             if (response.statusCode() == 500) {
-                LOG.debug("Ha ocurrido un error en el servidor al consultar nuevas versiones para " + elemento.getNombre());
+                LOG.debug("Ha ocurrido un error en el servidor al consultar nuevas versiones para " + nombre);
                 throw new ActualizacionException("Error en el servidor");
             }
 
@@ -45,11 +46,11 @@ public class ConsultaService {
                 ActualizacionResponse actualizacionResponse = JsonUtils.fromJson(response.body(), ActualizacionResponse.class);
 
                 if (!actualizacionResponse.isActualizable()) {
-                    LOG.debug("No existen nuevas versiones disponibles para " + elemento.getNombre());
+                    LOG.debug("No existen nuevas versiones disponibles para " + nombre);
                     return null;
                 }
 
-                LOG.debug("Existe una nueva versión del elemento {} a la version {}", elemento.getNombre(), actualizacionResponse.getVersion());
+                LOG.debug("Existe una nueva versión del elemento {} a la version {}", nombre, actualizacionResponse.getVersion());
                 return actualizacionResponse.getVersion();
             }
         } catch (Exception e) {
@@ -59,10 +60,10 @@ public class ConsultaService {
         return null;
     }
 
-    public InstalacionResponse existeInstalacionDisponible(String nombre) throws InstalacionException {
+    public InstalacionResponse existeInstalacionDisponible(String nombre, TipoElemento tipo) throws InstalacionException {
         String nombreTratado = URLEncoder.encode(nombre, StandardCharsets.UTF_8);
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/buscar-recurso";
-        String urlConParametros = String.format("%s?nombre=%s&incluir=%s", baseUrl, nombreTratado, "procesos");
+        String urlConParametros = String.format("%s?nombre=%s&tipo=%s&incluir=%s", baseUrl, nombreTratado, tipo.toString(), "procesos");
 
         try {
             HttpResponse<String> response = apiClient.enviarPeticionGet(urlConParametros, HttpResponse.BodyHandlers.ofString());
@@ -90,7 +91,7 @@ public class ConsultaService {
         String versionActual = URLEncoder.encode(elemento.getVersion(), StandardCharsets.UTF_8);
         String versionActualizable = URLEncoder.encode(version, StandardCharsets.UTF_8);
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/obtener-instrucciones";
-        String urlConParametros = String.format("%s?nombre=%s&versionActual=%s&versionActualizable=%s", baseUrl, nombre, versionActual, versionActualizable);
+        String urlConParametros = String.format("%s?nombre=%s&versionActual=%s&versionActualizable=%s&tipo=%s", baseUrl, nombre, versionActual, versionActualizable, TipoElemento.APLICACION);
 
         try {
             HttpResponse<String> response = apiClient.enviarPeticionGet(urlConParametros, HttpResponse.BodyHandlers.ofString());

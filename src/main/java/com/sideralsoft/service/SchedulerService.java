@@ -1,7 +1,9 @@
 package com.sideralsoft.service;
 
 import com.sideralsoft.config.SparkConfig;
+import com.sideralsoft.domain.Aplicacion;
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.utils.ElementosSingleton;
 import com.sideralsoft.utils.http.ApiClientImpl;
 import com.sideralsoft.utils.http.InstruccionResponse;
@@ -38,9 +40,13 @@ public class SchedulerService {
             LOG.debug("Iniciando proceso de actualizacion.");
             List<Elemento> elementos = elementosSingleton.obtenerElementos();
             for (Elemento elemento : elementos) {
-                String version = consultaService.existeActualizacionDisponible(elemento);
+                String version = consultaService.existeActualizacionDisponible(elemento.getNombre(), elemento.getVersion(), elemento.getTipo());
 
                 if (StringUtils.isBlank(version)) {
+                    if (elemento.getTipo().equals(TipoElemento.APLICACION) && elemento.getDependencias() != null) {
+                        Aplicacion aplicacion = new Aplicacion(elemento);
+                        elemento.setDependencias(aplicacion.actualizarDependencias());
+                    }
                     continue;
                 }
 

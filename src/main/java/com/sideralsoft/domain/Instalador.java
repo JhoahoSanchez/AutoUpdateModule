@@ -156,6 +156,11 @@ public class Instalador implements Actualizable, Instalable {
         }
     }
 
+    @Override
+    public void instalarExtras() throws InstalacionException {
+
+    }
+
     private boolean procesoEnEjecucion(String nombreProceso) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder("tasklist", "/FI", "IMAGENAME eq " + nombreProceso);
         Process process = processBuilder.start();

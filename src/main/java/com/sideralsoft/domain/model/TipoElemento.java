@@ -5,4 +5,5 @@ public enum TipoElemento {
     APLICACION_GESTOR,
     INSTALADOR,
     CERTIFICADO,
+    DEPENDENCIA,
 }

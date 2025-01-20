@@ -23,10 +23,12 @@ public class ActualizacionService {
     }
 
     public boolean actualizarElemento(Elemento elemento, List<InstruccionResponse> instrucciones, String version) {
-        String rutaTemporal = "";
+        String rutaTemporal;
 
-        if (!instrucciones.stream().allMatch(instr -> instr.getAccion() == TipoAccion.ELIMINAR)) {
+        if (instrucciones != null && !instrucciones.stream().allMatch(instr -> instr.getAccion() == TipoAccion.ELIMINAR)) {
             rutaTemporal = descargaService.descargarArchivos(elemento, instrucciones, version);
+        } else {
+            rutaTemporal = descargaService.descargarArchivos(elemento.getNombre(), elemento.getVersion(), elemento.getTipo());
         }
 
         if (StringUtils.isBlank(rutaTemporal)) {

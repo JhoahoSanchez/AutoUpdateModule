@@ -5,4 +5,6 @@ import com.sideralsoft.utils.exception.InstalacionException;
 public interface Instalable {
 
     void instalar() throws InstalacionException;
+
+    void instalarExtras() throws InstalacionException;
 }

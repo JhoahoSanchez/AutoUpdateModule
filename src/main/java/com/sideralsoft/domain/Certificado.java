@@ -71,4 +71,9 @@ public class Certificado implements Actualizable, Instalable {
             throw new InstalacionException("Ha ocurrido un error durante la instalacion de certificados.", e);
         }
     }
+
+    @Override
+    public void instalarExtras() throws InstalacionException {
+
+    }
 }

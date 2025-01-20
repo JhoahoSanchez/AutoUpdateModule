@@ -2,6 +2,7 @@ package com.sideralsoft.service;
 
 import com.sideralsoft.config.ApplicationProperties;
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.utils.JsonUtils;
 import com.sideralsoft.utils.http.ActualizacionRequest;
 import com.sideralsoft.utils.http.ApiClient;
@@ -33,13 +34,13 @@ public class DescargaService {
         this.apiClient = apiClient;
     }
 
-    public String descargarArchivos(Elemento elemento, String version) {
+    public String descargarArchivos(String nombre, String version, TipoElemento tipo) {
         String rutaTemporal = null;
 
-        String nombre = URLEncoder.encode(elemento.getNombre(), StandardCharsets.UTF_8);
+        String nombreTratado = URLEncoder.encode(nombre, StandardCharsets.UTF_8);
         String versionActualizable = URLEncoder.encode(version, StandardCharsets.UTF_8);
         String baseUrl = ApplicationProperties.getProperty("api.url") + "/descargar-archivos-instalacion";
-        String urlConParametros = String.format("%s?nombre=%s&ultimaVersion=%s", baseUrl, nombre, versionActualizable);
+        String urlConParametros = String.format("%s?nombre=%s&ultimaVersion=%s&tipo=%s", baseUrl, nombreTratado, versionActualizable, tipo);
 
         try {
             HttpResponse<InputStream> response = apiClient.enviarPeticionGet(urlConParametros, HttpResponse.BodyHandlers.ofInputStream());
@@ -63,7 +64,7 @@ public class DescargaService {
                 Files.createDirectories(rutaArchivoZIP);
             }
 
-            rutaTemporal = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"), elemento.getNombre()).toString();
+            rutaTemporal = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaAlmacenamientoTemporal"), nombre).toString();
             Files.copy(response.body(), rutaArchivoZIP, StandardCopyOption.REPLACE_EXISTING);
             descomprimirArchivoZIP(rutaArchivoZIP.toString(), rutaTemporal);
 
@@ -87,6 +88,7 @@ public class DescargaService {
         actualizacionRequest.setNombre(nombre);
         actualizacionRequest.setVersion(versionActualizable);
         actualizacionRequest.setInstrucciones(instrucciones);
+        actualizacionRequest.setTipo(elemento.getTipo());
 
         try {
             HttpResponse<InputStream> response = apiClient.enviarPeticionPost(

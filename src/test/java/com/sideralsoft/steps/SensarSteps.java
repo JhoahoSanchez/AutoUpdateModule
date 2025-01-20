@@ -46,7 +46,7 @@ public class SensarSteps {
         ConsultaService consultaService = new ConsultaService(mockApiClient);
         for (Elemento elemento : ElementosSingleton.getInstance().obtenerElementos()) {
             try {
-                respuestas.add(consultaService.existeActualizacionDisponible(elemento));
+                respuestas.add(consultaService.existeActualizacionDisponible(elemento.getNombre(), elemento.getVersion(), elemento.getTipo()));
             } catch (ActualizacionException e) {
                 throw new RuntimeException(e);
             }

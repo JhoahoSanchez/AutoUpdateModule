@@ -1,13 +1,19 @@
 package com.sideralsoft.domain;
 
 import com.sideralsoft.config.ApplicationProperties;
+import com.sideralsoft.domain.model.Dependencia;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.Proceso;
+import com.sideralsoft.domain.model.TipoElemento;
+import com.sideralsoft.service.ConsultaService;
+import com.sideralsoft.service.DescargaService;
 import com.sideralsoft.service.RollbackService;
 import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.exception.InstalacionException;
+import com.sideralsoft.utils.http.ApiClientImpl;
 import com.sideralsoft.utils.http.InstruccionResponse;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -24,16 +30,33 @@ public class Aplicacion implements Actualizable, Instalable {
     private static final Logger LOG = LoggerFactory.getLogger(Aplicacion.class);
 
     protected final Elemento elemento;
+    protected final Dependencia dependencia;
     protected final List<InstruccionResponse> instrucciones;
     protected final String rutaTemporal;
 
     private final RollbackService rollbackService;
 
+    public Aplicacion(Elemento elemento) {
+        this.elemento = elemento;
+        this.dependencia = null;
+        this.rutaTemporal = null;
+        this.instrucciones = null;
+        this.rollbackService = null;
+    }
+
     public Aplicacion(Elemento elemento, String rutaTemporal) {
         this.elemento = elemento;
         this.rutaTemporal = rutaTemporal;
+        this.dependencia = null;
         this.instrucciones = null;
+        this.rollbackService = null;
+    }
 
+    public Aplicacion(Elemento elemento, Dependencia dependencia) {
+        this.elemento = elemento;
+        this.dependencia = dependencia;
+        this.instrucciones = null;
+        this.rutaTemporal = null;
         this.rollbackService = null;
     }
 
@@ -41,8 +64,8 @@ public class Aplicacion implements Actualizable, Instalable {
         this.elemento = elemento;
         this.rutaTemporal = rutaTemporal;
         this.instrucciones = instrucciones;
-
         this.rollbackService = new RollbackService(elemento.getNombre());
+        this.dependencia = null;
     }
 
     @Override
@@ -143,6 +166,8 @@ public class Aplicacion implements Actualizable, Instalable {
                     LOG.debug("Acción no reconocida: " + instruccion.getAccion());
             }
         }
+
+        this.actualizarDependencias();
     }
 
     @Override
@@ -211,6 +236,53 @@ public class Aplicacion implements Actualizable, Instalable {
         } finally {
             this.borrarArchivosTemporales();
         }
+    }
+
+    @Override
+    public void instalarExtras() throws InstalacionException {
+        if (dependencia == null) {
+            return;
+        }
+
+        DescargaService descargaService = new DescargaService(new ApiClientImpl<>());
+
+        try {
+            String rutaTemporal = descargaService.descargarArchivos(dependencia.getNombre(), dependencia.getVersion(), TipoElemento.DEPENDENCIA);
+            Files.move(Path.of(rutaTemporal), Path.of(elemento.getRuta(), dependencia.getRuta()), StandardCopyOption.REPLACE_EXISTING);
+            LOG.debug("Dependencia " + dependencia.getNombre() + " instalada con exito en la version " + dependencia.getVersion());
+        } catch (Exception e) {
+            LOG.error("Ha ocurrido un error durante la instalacion de dependencias", e);
+            throw new InstalacionException("Ha ocurrido un error durante la instalacion de dependencias", e);
+        }
+
+    }
+
+    public List<Dependencia> actualizarDependencias() throws ActualizacionException, IOException {
+        if (elemento.getDependencias() == null) {
+            LOG.debug("La aplicacion " + elemento.getNombre() + " no cuenta con dependencias instaladas.");
+            return null;
+        }
+
+        ConsultaService consultaService = new ConsultaService(new ApiClientImpl<>());
+        DescargaService descargaService = new DescargaService(new ApiClientImpl<>());
+
+        List<Dependencia> dependencias = elemento.getDependencias();
+
+        for (Dependencia dependencia : dependencias) {
+            String versionActualizable = consultaService.existeActualizacionDisponible(dependencia.getNombre(), dependencia.getVersion(), TipoElemento.DEPENDENCIA);
+
+            if (StringUtils.isBlank(versionActualizable)) {
+                LOG.debug("La dependencia " + dependencia.getNombre() + " no cuenta con una actualizacion disponible.");
+                continue;
+            }
+
+            String rutaTemporal = descargaService.descargarArchivos(dependencia.getNombre(), versionActualizable, TipoElemento.DEPENDENCIA);
+            Files.move(Path.of(rutaTemporal), Path.of(elemento.getRuta(), dependencia.getRuta()), StandardCopyOption.REPLACE_EXISTING);
+            LOG.debug("Dependencia " + dependencia.getNombre() + " actualizada con exito a la version " + versionActualizable);
+            dependencia.setVersion(versionActualizable);
+        }
+
+        return dependencias;
     }
 
     private boolean procesoEnEjecucion(String nombreProceso) throws IOException, InterruptedException {
