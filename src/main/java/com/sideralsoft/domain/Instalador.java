@@ -140,7 +140,7 @@ public class Instalador implements Actualizable, Instalable {
     @Override
     public void instalar() throws InstalacionException {
         try {
-            ProcessBuilder processBuilderInstalacion = new ProcessBuilder(Path.of(rutaTemporal, elemento.getNombre() + "-setup.exe").toString());
+            ProcessBuilder processBuilderInstalacion = new ProcessBuilder(Path.of(rutaTemporal, elemento.getNombre() + "-setup.exe").toString(), "/VERYSILENT");
             Process procesoInstalacion = processBuilderInstalacion.start();
 
             int codigoSalidaInstalacion = procesoInstalacion.waitFor();

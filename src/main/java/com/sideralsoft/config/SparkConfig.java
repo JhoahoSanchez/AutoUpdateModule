@@ -100,7 +100,7 @@ public class SparkConfig {
                 elemento.setNombre(nombre);
                 elemento.setTipo(tipo);
 
-                if (tipo.equals(TipoElemento.APLICACION)) {
+                if (tipo.equals(TipoElemento.APLICACION) || tipo.equals(TipoElemento.INSTALADOR)) {
                     elemento.setRuta(ApplicationProperties.getProperty("app.config.storage.rutaInstalacion") + "\\" + nombre);
                     Path rutaInstalacion = Paths.get(ApplicationProperties.getProperty("app.config.storage.rutaInstalacion"), nombre);
 
