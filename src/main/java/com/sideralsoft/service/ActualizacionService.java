@@ -35,7 +35,7 @@ public class ActualizacionService {
             return false;
         }
 
-        try {
+        try { //TODO: AGREGAR SOPORTE PARA DEPENDENCIA
             Actualizable actualizable;
             if (elemento.getTipo().equals(TipoElemento.APLICACION)) {
                 actualizable = new Aplicacion(elemento, rutaTemporal, instrucciones);

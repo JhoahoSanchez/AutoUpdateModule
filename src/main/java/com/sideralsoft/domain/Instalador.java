@@ -101,7 +101,7 @@ public class Instalador implements Actualizable, Instalable {
     }
 
     @Override
-    public void borrarArchivosTemporales() throws Exception {
+    public void borrarArchivosTemporales() {
         try {
             if (rutaTemporal.isEmpty()) {
                 return;
@@ -153,6 +153,8 @@ public class Instalador implements Actualizable, Instalable {
         } catch (Exception e) {
             LOG.error("Ha ocurrido un error durante la instalacion", e);
             throw new InstalacionException("Ha ocurrido un error durante la instalacion", e);
+        } finally {
+            this.borrarArchivosTemporales();
         }
     }
 
