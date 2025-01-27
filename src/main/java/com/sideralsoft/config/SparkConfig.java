@@ -24,8 +24,7 @@ import java.nio.file.Paths;
 import java.util.ArrayList;
 import java.util.List;
 
-import static spark.Spark.get;
-import static spark.Spark.post;
+import static spark.Spark.*;
 
 public class SparkConfig {
 
@@ -60,6 +59,18 @@ public class SparkConfig {
     }
 
     private void configurarRutas() {
+        before((req, res) -> {
+            String token = req.headers("Authorization");
+
+            if (StringUtils.isBlank(token)) {
+                halt(401, "No se ha encontrado el token en la peticion");
+            }
+
+            if (!ApplicationProperties.getProperty("app.token").equals(token)) {
+                halt(401, "No cuenta con autorizacion");
+            }
+        });
+
         get("version", (req, res) -> {
             res.type("text/plain");
 

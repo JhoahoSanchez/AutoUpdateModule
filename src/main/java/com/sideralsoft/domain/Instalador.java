@@ -89,7 +89,7 @@ public class Instalador implements Actualizable, Instalable {
 
     @Override
     public void reemplazarElementos() throws Exception {
-        ProcessBuilder processBuilderDesinstalacion = new ProcessBuilder(Path.of(elemento.getRuta(), "unins000.exe").toString(), "/VERYSILENT", "/LOG=C:\\JhoahoInc\\logs\\uninstall.log");
+        ProcessBuilder processBuilderDesinstalacion = new ProcessBuilder(Path.of(elemento.getRuta(), "unins000.exe").toString(), "/VERYSILENT");
 
         Process procesoDesinstalacion = processBuilderDesinstalacion.start();
 
@@ -100,7 +100,7 @@ public class Instalador implements Actualizable, Instalable {
 
         Thread.sleep(1000);
 
-        ProcessBuilder processBuilderInstalacion = new ProcessBuilder(Path.of(rutaTemporal, elemento.getNombre() + "-setup.exe").toString(), "/VERYSILENT", "/LOG=C:\\JhoahoInc\\logs\\install.log");
+        ProcessBuilder processBuilderInstalacion = new ProcessBuilder(Path.of(rutaTemporal, elemento.getNombre() + "-setup.exe").toString(), "/VERYSILENT");
         Process procesoInstalacion = processBuilderInstalacion.start();
 
         int codigoSalidaInstalacion = procesoInstalacion.waitFor();
