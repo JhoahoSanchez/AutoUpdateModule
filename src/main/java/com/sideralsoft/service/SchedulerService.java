@@ -50,11 +50,15 @@ public class SchedulerService {
                     continue;
                 }
 
-                List<InstruccionResponse> instrucciones = consultaService.obtenerInstrucciones(elemento, version);
+                List<InstruccionResponse> instrucciones = null;
 
-                if (instrucciones == null || instrucciones.isEmpty()) {
-                    LOG.debug("No se ha encontrado instrucciones de actualizacion para " + elemento.getNombre());
-                    continue;
+                if (elemento.getTipo().equals(TipoElemento.APLICACION) || elemento.getTipo().equals(TipoElemento.APLICACION_GESTOR)) {
+                    instrucciones = consultaService.obtenerInstrucciones(elemento, version);
+
+                    if (instrucciones == null || instrucciones.isEmpty()) {
+                        LOG.debug("No se ha encontrado instrucciones de actualizacion para " + elemento.getNombre());
+                        continue;
+                    }
                 }
 
                 if (actualizacionService.actualizarElemento(elemento, instrucciones, version)) {

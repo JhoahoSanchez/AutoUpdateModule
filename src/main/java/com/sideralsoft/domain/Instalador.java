@@ -2,10 +2,12 @@ package com.sideralsoft.domain;
 
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.Proceso;
+import com.sideralsoft.domain.model.TipoProceso;
 import com.sideralsoft.service.RollbackService;
 import com.sideralsoft.utils.exception.ActualizacionException;
 import com.sideralsoft.utils.exception.InstalacionException;
 import org.apache.commons.io.FileUtils;
+import org.apache.commons.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -57,14 +59,22 @@ public class Instalador implements Actualizable, Instalable {
         }
 
         for (Proceso proceso : elemento.getProcesos()) {
-            boolean enEjecucion = procesoEnEjecucion(proceso.getNombre());
+            String pid = "";
 
-            if (!enEjecucion) {
+            if (proceso.getTipo().equals(TipoProceso.NATIVO)) {
+                pid = procesoNativoEnEjecucion(proceso.getNombre());
+            }
+
+            if (proceso.getTipo().equals(TipoProceso.JAVA)) {
+                pid = procesoJavaEnEjecucion(proceso.getNombre());
+            }
+
+            if (StringUtils.isBlank(pid)) {
                 LOG.debug("El proceso {} no está en ejecución. No es necesario detenerlo.", proceso.getNombre());
                 continue;
             }
 
-            ProcessBuilder processBuilder = new ProcessBuilder("taskkill", "/F", "/IM", proceso.getNombre());
+            ProcessBuilder processBuilder = new ProcessBuilder("taskkill", "/PID", pid, "/F");
             Process process = processBuilder.start();
 
             int exitCode = process.waitFor();
@@ -79,7 +89,7 @@ public class Instalador implements Actualizable, Instalable {
 
     @Override
     public void reemplazarElementos() throws Exception {
-        ProcessBuilder processBuilderDesinstalacion = new ProcessBuilder(Path.of(elemento.getRuta(), "unins000.exe").toString(), "/VERYSILENT");
+        ProcessBuilder processBuilderDesinstalacion = new ProcessBuilder(Path.of(elemento.getRuta(), "unins000.exe").toString(), "/VERYSILENT", "/LOG=C:\\JhoahoInc\\logs\\uninstall.log");
 
         Process procesoDesinstalacion = processBuilderDesinstalacion.start();
 
@@ -88,7 +98,9 @@ public class Instalador implements Actualizable, Instalable {
             throw new ActualizacionException("No se ha podido desinstalar " + elemento.getNombre() + " correctamente");
         }
 
-        ProcessBuilder processBuilderInstalacion = new ProcessBuilder(Path.of(rutaTemporal, elemento.getNombre() + "-setup.exe", "/VERYSILENT").toString());
+        Thread.sleep(1000);
+
+        ProcessBuilder processBuilderInstalacion = new ProcessBuilder(Path.of(rutaTemporal, elemento.getNombre() + "-setup.exe").toString(), "/VERYSILENT", "/LOG=C:\\JhoahoInc\\logs\\install.log");
         Process procesoInstalacion = processBuilderInstalacion.start();
 
         int codigoSalidaInstalacion = procesoInstalacion.waitFor();
@@ -163,7 +175,7 @@ public class Instalador implements Actualizable, Instalable {
 
     }
 
-    private boolean procesoEnEjecucion(String nombreProceso) throws IOException, InterruptedException {
+    private String procesoNativoEnEjecucion(String nombreProceso) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder("tasklist", "/FI", "IMAGENAME eq " + nombreProceso);
         Process process = processBuilder.start();
         int exitCode = process.waitFor();
@@ -176,11 +188,27 @@ public class Instalador implements Actualizable, Instalable {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.contains(nombreProceso)) {
-                    return true;
+                    return line.split(" ")[1];
                 }
             }
         }
 
-        return false;
+        return null;
+    }
+
+    private String procesoJavaEnEjecucion(String nombreProceso) throws IOException {
+        ProcessBuilder builder = new ProcessBuilder("jps", "-lvm");
+        Process process = builder.start();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(nombreProceso)) {
+                    return line.split(" ")[0];
+                }
+            }
+        }
+
+        return null;
     }
 }

@@ -1,4 +1,4 @@
-Feature: Sensado continuo de nuevas versiones
+Feature: Deteccion continua de nuevas versiones
 
   Scenario: Nueva version disponible
     Given que existe una nueva version de un elemento en el repositorio

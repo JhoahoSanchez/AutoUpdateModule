@@ -77,8 +77,6 @@ public class SparkConfig {
             res.type("text/plain");
 
             try {
-                //EX: appmanager install interfaz-hl7 --type=APLICACION
-                //EX: appmanager install interfaz-hl7 --type=APLICACION --dependency=estrategia-jhoaho
                 String nombre = req.queryParams("nombre");
                 TipoElemento tipo = TipoElemento.valueOf(req.queryParams("tipo"));
 
@@ -110,7 +108,8 @@ public class SparkConfig {
                         for (Proceso proceso : instalacionDisponible.getProcesos()) {
                             procesos.add(
                                     new Proceso(proceso.getNombre(),
-                                            Paths.get(elemento.getRuta(), proceso.getRuta()).toString()
+                                            Paths.get(elemento.getRuta(), proceso.getRuta()).toString(),
+                                            proceso.getTipo()
                                     )
                             );
                         }
@@ -237,7 +236,7 @@ public class SparkConfig {
                 String version = consultaService.existeActualizacionDisponible(elemento.getNombre(), elemento.getVersion(), elemento.getTipo());
 
                 if (StringUtils.isBlank(version)) {
-                    res.status(204);
+                    res.status(404);
                     return "No se ha encontrado una actualizacion disponible para " + elemento.getNombre();
                 }
 

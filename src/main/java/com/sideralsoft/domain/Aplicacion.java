@@ -1,10 +1,7 @@
 package com.sideralsoft.domain;
 
 import com.sideralsoft.config.ApplicationProperties;
-import com.sideralsoft.domain.model.Dependencia;
-import com.sideralsoft.domain.model.Elemento;
-import com.sideralsoft.domain.model.Proceso;
-import com.sideralsoft.domain.model.TipoElemento;
+import com.sideralsoft.domain.model.*;
 import com.sideralsoft.service.ConsultaService;
 import com.sideralsoft.service.DescargaService;
 import com.sideralsoft.service.RollbackService;
@@ -96,14 +93,22 @@ public class Aplicacion implements Actualizable, Instalable {
         }
 
         for (Proceso proceso : elemento.getProcesos()) {
-            boolean enEjecucion = procesoEnEjecucion(proceso.getNombre());
+            String pid = "";
 
-            if (!enEjecucion) {
+            if (proceso.getTipo().equals(TipoProceso.NATIVO)) {
+                pid = procesoNativoEnEjecucion(proceso.getNombre());
+            }
+
+            if (proceso.getTipo().equals(TipoProceso.JAVA)) {
+                pid = procesoJavaEnEjecucion(proceso.getNombre());
+            }
+
+            if (StringUtils.isBlank(pid)) {
                 LOG.debug("El proceso {} no está en ejecución. No es necesario detenerlo.", proceso.getNombre());
                 continue;
             }
 
-            ProcessBuilder processBuilder = new ProcessBuilder("taskkill", "/F", "/IM", proceso.getNombre());
+            ProcessBuilder processBuilder = new ProcessBuilder("taskkill", "/PID", pid, "/F");
             Process process = processBuilder.start();
 
             int exitCode = process.waitFor();
@@ -285,7 +290,7 @@ public class Aplicacion implements Actualizable, Instalable {
         return dependencias;
     }
 
-    private boolean procesoEnEjecucion(String nombreProceso) throws IOException, InterruptedException {
+    private String procesoNativoEnEjecucion(String nombreProceso) throws IOException, InterruptedException {
         ProcessBuilder processBuilder = new ProcessBuilder("tasklist", "/FI", "IMAGENAME eq " + nombreProceso);
         Process process = processBuilder.start();
         int exitCode = process.waitFor();
@@ -298,11 +303,27 @@ public class Aplicacion implements Actualizable, Instalable {
             String line;
             while ((line = reader.readLine()) != null) {
                 if (line.contains(nombreProceso)) {
-                    return true;
+                    return line.split(" ")[1];
                 }
             }
         }
 
-        return false;
+        return null;
+    }
+
+    private String procesoJavaEnEjecucion(String nombreProceso) throws IOException {
+        ProcessBuilder builder = new ProcessBuilder("jps", "-lvm");
+        Process process = builder.start();
+
+        try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+            String line;
+            while ((line = reader.readLine()) != null) {
+                if (line.contains(nombreProceso)) {
+                    return line.split(" ")[0];
+                }
+            }
+        }
+
+        return null;
     }
 }

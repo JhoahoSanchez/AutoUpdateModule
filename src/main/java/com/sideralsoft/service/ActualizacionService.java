@@ -28,14 +28,14 @@ public class ActualizacionService {
         if (instrucciones != null && !instrucciones.stream().allMatch(instr -> instr.getAccion() == TipoAccion.ELIMINAR)) {
             rutaTemporal = descargaService.descargarArchivos(elemento, instrucciones, version);
         } else {
-            rutaTemporal = descargaService.descargarArchivos(elemento.getNombre(), elemento.getVersion(), elemento.getTipo());
+            rutaTemporal = descargaService.descargarArchivos(elemento.getNombre(), version, elemento.getTipo());
         }
 
         if (StringUtils.isBlank(rutaTemporal)) {
             return false;
         }
 
-        try { //TODO: AGREGAR SOPORTE PARA DEPENDENCIA
+        try {
             Actualizable actualizable;
             if (elemento.getTipo().equals(TipoElemento.APLICACION)) {
                 actualizable = new Aplicacion(elemento, rutaTemporal, instrucciones);

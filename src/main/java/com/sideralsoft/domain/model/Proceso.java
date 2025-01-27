@@ -10,13 +10,16 @@ public class Proceso {
     private String nombre;
     @JsonProperty("ruta")
     private String ruta;
+    @JsonProperty("tipo")
+    private TipoProceso tipo;
 
     public Proceso() {
     }
 
-    public Proceso(String nombre, String ruta) {
+    public Proceso(String nombre, String ruta, TipoProceso tipo) {
         this.nombre = nombre;
         this.ruta = ruta;
+        this.tipo = tipo;
     }
 
     public String getNombre() {
@@ -33,5 +36,22 @@ public class Proceso {
 
     public void setRuta(String ruta) {
         this.ruta = ruta;
+    }
+
+    public TipoProceso getTipo() {
+        return tipo;
+    }
+
+    public void setTipo(TipoProceso tipo) {
+        this.tipo = tipo;
+    }
+
+    @Override
+    public String toString() {
+        return "Proceso{" +
+                "nombre='" + nombre + '\'' +
+                ", ruta='" + ruta + '\'' +
+                ", tipo=" + tipo +
+                '}';
     }
 }

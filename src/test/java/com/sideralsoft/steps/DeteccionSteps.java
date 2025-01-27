@@ -15,12 +15,12 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 
-public class SensarSteps {
+public class DeteccionSteps {
 
     private final MockApiClient mockApiClient;
     private final List<String> respuestas;
 
-    public SensarSteps() {
+    public DeteccionSteps() {
         mockApiClient = new MockApiClient();
         respuestas = new ArrayList<>();
     }
