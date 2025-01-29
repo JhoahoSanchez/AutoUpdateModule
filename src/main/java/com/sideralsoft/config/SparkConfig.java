@@ -1,5 +1,6 @@
 package com.sideralsoft.config;
 
+import com.sideralsoft.domain.Aplicacion;
 import com.sideralsoft.domain.model.Dependencia;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.Proceso;
@@ -10,6 +11,7 @@ import com.sideralsoft.service.DescargaService;
 import com.sideralsoft.service.InstalacionService;
 import com.sideralsoft.utils.ElementosSingleton;
 import com.sideralsoft.utils.JsonUtils;
+import com.sideralsoft.utils.http.ActualizacionResponse;
 import com.sideralsoft.utils.http.ApiClientImpl;
 import com.sideralsoft.utils.http.InstalacionResponse;
 import com.sideralsoft.utils.http.InstruccionResponse;
@@ -283,6 +285,34 @@ public class SparkConfig {
                 LOG.error("Error general al intentar actualizar los elementos: ", e);
                 res.status(500);
                 return "Error al intentar actualizar los elementos";
+            }
+        });
+
+        post("update/dependency", (req, res) -> {
+            res.type("text/plain");
+
+            String nombreDependencia = req.queryParams("dependencia");
+            Elemento elemento = ElementosSingleton.getInstance().obtenerElemento(req.queryParams("nombre"));
+
+            if (elemento == null) {
+                res.status(404);
+                return "No se encontro el elemento";
+            }
+
+            if (elemento.getDependencias() == null || elemento.getDependencias().stream().noneMatch(d -> d.getNombre().equals(nombreDependencia))) {
+                res.status(500);
+                return "No existe una instalacion de " + nombreDependencia;
+            }
+
+            try {
+                Aplicacion aplicacion = new Aplicacion(elemento);
+                elemento.setDependencias(aplicacion.actualizarDependencias());
+                LOG.debug("Dependencias actualizadas exitosamente");
+                return "Dependencias actualizadas exitosamente";
+            } catch (Exception e) {
+                LOG.error("Error general al intentar actualizar dependencias: ", e);
+                res.status(500);
+                return "Error al intentar actualizar dependencias";
             }
         });
     }
