@@ -57,7 +57,7 @@ public class InstalacionService {
                 return true;
             }
         } catch (InstalacionException e) {
-            LOG.error("Error al actualizar el elemento " + elemento.getNombre(), e);
+            LOG.error("Error al instalar el elemento " + elemento.getNombre(), e);
             return false;
         }
         return false;

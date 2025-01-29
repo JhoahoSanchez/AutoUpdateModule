@@ -173,7 +173,7 @@ public class SparkConfig {
                     return "No se ha encontrado una instalacion de " + nombreAplicacion;
                 }
 
-                if (elemento.getDependencias().stream().anyMatch(d -> d.getNombre().equals(nombreDependencia))) {
+                if (elemento.getDependencias() != null && elemento.getDependencias().stream().anyMatch(d -> d.getNombre().equals(nombreDependencia))) {
                     res.status(500);
                     return "Ya existe una instalacion de " + nombreDependencia;
                 }

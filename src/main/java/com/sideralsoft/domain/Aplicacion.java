@@ -253,7 +253,7 @@ public class Aplicacion implements Actualizable, Instalable {
 
         try {
             String rutaTemporal = descargaService.descargarArchivos(dependencia.getNombre(), dependencia.getVersion(), TipoElemento.DEPENDENCIA);
-            Files.move(Path.of(rutaTemporal), Path.of(elemento.getRuta(), dependencia.getRuta()), StandardCopyOption.REPLACE_EXISTING);
+            Files.move(Path.of(rutaTemporal, dependencia.getNombre() + ".jar"), Path.of(dependencia.getRuta(), dependencia.getNombre() + ".jar"), StandardCopyOption.REPLACE_EXISTING);
             LOG.debug("Dependencia " + dependencia.getNombre() + " instalada con exito en la version " + dependencia.getVersion());
         } catch (Exception e) {
             LOG.error("Ha ocurrido un error durante la instalacion de dependencias", e);

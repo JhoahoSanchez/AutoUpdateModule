@@ -74,7 +74,7 @@ public class SchedulerService {
     }
 
     private void generarNuevaHoraConsulta() {
-        LocalDateTime horaEspecifica = LocalDateTime.now().plusHours((int) ((Math.random() * (10 - 2)) + 2));
+        LocalDateTime horaEspecifica = LocalDateTime.now().plusHours((int) ((Math.random() * (8)) + 2));
         long delay = LocalDateTime.now().until(horaEspecifica, ChronoUnit.SECONDS);
         scheduler.scheduleAtFixedRate(this::generarProcesoActualizacion, delay, TimeUnit.HOURS.toSeconds(24), TimeUnit.SECONDS);
     }
