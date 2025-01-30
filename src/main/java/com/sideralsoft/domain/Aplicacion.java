@@ -282,7 +282,7 @@ public class Aplicacion implements Actualizable, Instalable {
             }
 
             String rutaTemporal = descargaService.descargarArchivos(dependencia.getNombre(), versionActualizable, TipoElemento.DEPENDENCIA);
-            Files.move(Path.of(rutaTemporal), Path.of(elemento.getRuta(), dependencia.getRuta()), StandardCopyOption.REPLACE_EXISTING);
+            Files.move(Path.of(rutaTemporal, dependencia.getNombre() + ".jar"), Path.of(dependencia.getRuta(), dependencia.getNombre() + ".jar"), StandardCopyOption.REPLACE_EXISTING);
             LOG.debug("Dependencia " + dependencia.getNombre() + " actualizada con exito a la version " + versionActualizable);
             dependencia.setVersion(versionActualizable);
         }
