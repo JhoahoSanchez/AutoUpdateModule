@@ -308,6 +308,13 @@ public class SparkConfig {
                 Aplicacion aplicacion = new Aplicacion(elemento);
                 elemento.setDependencias(aplicacion.actualizarDependencias());
                 LOG.debug("Dependencias actualizadas exitosamente");
+                List<Elemento> elementos = ElementosSingleton.getInstance().obtenerElementos();
+                List<Elemento> elementosActualizados = elementos.stream()
+                        .map(e -> e.getNombre().equals(elemento.getNombre()) ? elemento : e)
+                        .toList();
+
+                ElementosSingleton.getInstance().actualizarArchivoElementos(elementosActualizados);
+                ElementosSingleton.getInstance().obtenerElementos();
                 return "Dependencias actualizadas exitosamente";
             } catch (Exception e) {
                 LOG.error("Error general al intentar actualizar dependencias: ", e);
