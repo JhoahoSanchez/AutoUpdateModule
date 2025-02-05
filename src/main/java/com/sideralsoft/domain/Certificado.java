@@ -16,12 +16,12 @@ public class Certificado implements Actualizable, Instalable {
     private static final Logger LOG = LoggerFactory.getLogger(Certificado.class);
 
     private final Elemento elemento;
-    private final String rutaDescarga;
+    private final String rutaTemporal;
     private final CertificadoService certificadoService;
 
-    public Certificado(Elemento elemento, String rutaDescarga) {
+    public Certificado(Elemento elemento, String rutaTemporal) {
         this.elemento = elemento;
-        this.rutaDescarga = rutaDescarga;
+        this.rutaTemporal = rutaTemporal;
         this.certificadoService = new CertificadoService();
     }
 
@@ -44,12 +44,12 @@ public class Certificado implements Actualizable, Instalable {
 
     @Override
     public void reemplazarElementos() throws ActualizacionException {
-        this.certificadoService.actualizarCertificado(rutaDescarga, elemento.getNombre());
+        this.certificadoService.actualizarCertificado(rutaTemporal, elemento.getNombre());
     }
 
     @Override
     public void borrarArchivosTemporales() throws IOException {
-        File directorio = new File(rutaDescarga);
+        File directorio = new File(rutaTemporal);
         if (directorio.exists()) {
             FileUtils.deleteDirectory(directorio);
             LOG.debug("Directorio eliminado correctamente.");
@@ -65,7 +65,7 @@ public class Certificado implements Actualizable, Instalable {
     @Override
     public void instalar() throws InstalacionException {
         try {
-            this.certificadoService.instalarCertificado(rutaDescarga);
+            this.certificadoService.instalarCertificado(rutaTemporal);
         } catch (Exception e) {
             LOG.error("Ha ocurrido un error durante la instalacion de certificados.", e);
             throw new InstalacionException("Ha ocurrido un error durante la instalacion de certificados.", e);

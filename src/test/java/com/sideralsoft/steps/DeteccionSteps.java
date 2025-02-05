@@ -1,6 +1,7 @@
 package com.sideralsoft.steps;
 
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.service.ConsultaService;
 import com.sideralsoft.utils.ElementosSingleton;
 import com.sideralsoft.utils.MockApiClient;
@@ -53,8 +54,8 @@ public class DeteccionSteps {
         }
     }
 
-    @Then("genera una tarea de actualizacion")
-    public void generaTareaDeActualizacion() throws ActualizacionException {
+    @Then("se genera una peticion para la descarga de la actualizacion")
+    public void seGeneraUnaPeticionParaLaDescargaDeLaActualizacion() throws ActualizacionException {
         for (String respuesta : respuestas) {
             if (StringUtils.isBlank(respuesta)) {
                 throw new ActualizacionException("Ha ocurrido un error al generar la tarea");
@@ -67,9 +68,11 @@ public class DeteccionSteps {
     private void generarElementosPruebaCliente(List<Map<String, String>> elementosMapList) {
         List<Elemento> elementos = new ArrayList<>();
         for (Map<String, String> elementoData : elementosMapList) {
-            String nombre = elementoData.get("Elemento");
-            String version = elementoData.get("Version");
-            elementos.add(new Elemento(nombre, version));
+            Elemento elemento = new Elemento();
+            elemento.setNombre(elementoData.get("Elemento"));
+            elemento.setVersion(elementoData.get("Version"));
+            elemento.setTipo(TipoElemento.valueOf(elementoData.get("Tipo")));
+            elementos.add(elemento);
         }
 
         ElementosSingleton.getInstance().actualizarArchivoElementos(elementos);
@@ -82,7 +85,7 @@ public class DeteccionSteps {
             Elemento elementoCliente = ElementosSingleton.getInstance().obtenerElemento(nombre);
 
             mockApiClient
-                    .addMockResponse(String.format("/buscar-actualizacion?nombre=%s&version=%s", nombre, elementoCliente.getVersion()),
+                    .addMockResponse(String.format("/buscar-actualizacion?nombre=%s&version=%s&tipo=%s", nombre, elementoCliente.getVersion(), elementoCliente.getTipo()),
                             "{\n" +
                                     "  \"mensaje\": \"Existe una nueva version\",\n" +
                                     "  \"actualizable\": true,\n" +

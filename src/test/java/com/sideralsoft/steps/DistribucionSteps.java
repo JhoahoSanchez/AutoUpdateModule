@@ -1,6 +1,7 @@
 package com.sideralsoft.steps;
 
 import com.sideralsoft.domain.model.Elemento;
+import com.sideralsoft.domain.model.TipoElemento;
 import com.sideralsoft.service.DescargaService;
 import com.sideralsoft.utils.ElementosSingleton;
 import com.sideralsoft.utils.MockApiClientDescarga;
@@ -48,7 +49,9 @@ public class DistribucionSteps {
     @When("se descarga el archivo y se descomprime en una carpeta temporal")
     public void seDescargaElArchivoYSeDescomprimeEnUnaCarpetaTemporal() throws Exception {
         for (Elemento elemento : elementosActualizables) {
-            rutasArchivosDescargados.add(descargaService.descargarArchivos(elemento.getNombre(), elemento.getVersion(), elemento.getTipo()));
+            String rutaTemporal = descargaService.descargarArchivos(elemento.getNombre(), elemento.getVersion(), elemento.getTipo());
+            assertNotNull(rutaTemporal);
+            rutasArchivosDescargados.add(rutaTemporal);
         }
     }
 
@@ -61,9 +64,11 @@ public class DistribucionSteps {
     private void generarElementosPruebaCliente(List<Map<String, String>> elementosMapList) {
         List<Elemento> elementos = new ArrayList<>();
         for (Map<String, String> elementoData : elementosMapList) {
-            String nombre = elementoData.get("Elemento");
-            String version = elementoData.get("Version");
-            elementos.add(new Elemento(nombre, version));
+            Elemento elemento = new Elemento();
+            elemento.setNombre(elementoData.get("Elemento"));
+            elemento.setVersion(elementoData.get("Version"));
+            elemento.setTipo(TipoElemento.valueOf(elementoData.get("Tipo")));
+            elementos.add(elemento);
         }
 
         ElementosSingleton.getInstance().actualizarArchivoElementos(elementos);
@@ -71,14 +76,16 @@ public class DistribucionSteps {
 
     private void generarElementosPruebaAPI(List<Map<String, String>> elementosMapList) throws IOException {
         for (Map<String, String> elementoData : elementosMapList) {
-            String nombre = elementoData.get("Elemento");
-            String version = elementoData.get("Version");
-            elementosActualizables.add(new Elemento(nombre, version));
+            Elemento elemento = new Elemento();
+            elemento.setNombre(elementoData.get("Elemento"));
+            elemento.setVersion(elementoData.get("Version"));
+            elemento.setTipo(TipoElemento.valueOf(elementoData.get("Tipo")));
+            elementosActualizables.add(elemento);
 
-            Path archivo = Paths.get(String.format("src/test/resources/files/%s-%s.zip", nombre, version));
+            Path archivo = Paths.get(String.format("src/test/resources/files/%s-%s.zip", elemento.getNombre(), elemento.getVersion()));
 
             mockApiClient
-                    .addMockResponse(String.format("/descargar-archivos-instalacion?nombre=%s&ultimaVersion=%s", nombre, version),
+                    .addMockResponse(String.format("/descargar-archivos-instalacion?nombre=%s&ultimaVersion=%s&tipo=%s", elemento.getNombre(), elemento.getVersion(), elemento.getTipo()),
                             Files.readAllBytes(archivo)
                     );
         }
