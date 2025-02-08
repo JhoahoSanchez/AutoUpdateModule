@@ -11,6 +11,7 @@ import io.cucumber.java.en.Given;
 import io.cucumber.java.en.Then;
 import io.cucumber.java.en.When;
 import org.apache.commons.lang3.StringUtils;
+import org.junit.Assert;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -47,7 +48,9 @@ public class DeteccionSteps {
         ConsultaService consultaService = new ConsultaService(mockApiClient);
         for (Elemento elemento : ElementosSingleton.getInstance().obtenerElementos()) {
             try {
-                respuestas.add(consultaService.existeActualizacionDisponible(elemento.getNombre(), elemento.getVersion(), elemento.getTipo()));
+                String respuesta = consultaService.existeActualizacionDisponible(elemento.getNombre(), elemento.getVersion(), elemento.getTipo());
+                Assert.assertNotNull(respuesta);
+                respuestas.add(respuesta);
             } catch (ActualizacionException e) {
                 throw new RuntimeException(e);
             }
@@ -60,8 +63,6 @@ public class DeteccionSteps {
             if (StringUtils.isBlank(respuesta)) {
                 throw new ActualizacionException("Ha ocurrido un error al generar la tarea");
             }
-
-            System.out.println("Tarea de actualizacion generada.");
         }
     }
 

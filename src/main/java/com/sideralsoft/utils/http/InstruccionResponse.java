@@ -36,4 +36,13 @@ public class InstruccionResponse {
     public void setAccion(TipoAccion accion) {
         this.accion = accion;
     }
+
+    @Override
+    public String toString() {
+        return "InstruccionResponse{" +
+                "elemento='" + elemento + '\'' +
+                ", ruta='" + ruta + '\'' +
+                ", accion=" + accion +
+                '}';
+    }
 }
