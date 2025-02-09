@@ -41,7 +41,7 @@ public class ActualizacionSteps {
         //Genera instalacion local para prueba
         FileManager.copyFolder(Paths.get("src/test/resources/files/instalaciones"), Paths.get("src/test/resources/mockInstalacion"));
         //Genera archivos de actualizacion para prueba
-        FileManager.copyFolder(Paths.get("src/test/resources/files/descomprimidos"), Paths.get("src/test/resources/mockInstalacion/temp"));
+        FileManager.copyFolder(Paths.get("src/test/resources/files/descomprimidosActualizacion"), Paths.get("src/test/resources/mockInstalacion/temp"));
     }
 
     @Given("que existe proceso de actualizacion iniciado para los elementos:")
