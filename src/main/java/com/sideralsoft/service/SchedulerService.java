@@ -1,6 +1,5 @@
 package com.sideralsoft.service;
 
-import com.sideralsoft.config.SparkConfig;
 import com.sideralsoft.domain.Aplicacion;
 import com.sideralsoft.domain.model.Elemento;
 import com.sideralsoft.domain.model.TipoElemento;
@@ -22,14 +21,11 @@ public class SchedulerService {
 
     private static final Logger LOG = LoggerFactory.getLogger(SchedulerService.class);
 
-    private final ElementosSingleton elementosSingleton;
     private final ActualizacionService actualizacionService;
     private final ConsultaService consultaService;
     private final ScheduledExecutorService scheduler;
 
     public SchedulerService() {
-        SparkConfig.getInstance();
-        this.elementosSingleton = ElementosSingleton.getInstance();
         this.actualizacionService = new ActualizacionService(new DescargaService(new ApiClientImpl<>()));
         this.consultaService = new ConsultaService(new ApiClientImpl<>());
         this.scheduler = Executors.newScheduledThreadPool(1);
@@ -38,7 +34,7 @@ public class SchedulerService {
     public void generarProcesoActualizacion() {
         try {
             LOG.debug("Iniciando proceso de actualizacion.");
-            List<Elemento> elementos = elementosSingleton.obtenerElementos();
+            List<Elemento> elementos = ElementosSingleton.getInstance().obtenerElementos();
             for (Elemento elemento : elementos) {
                 String version = consultaService.existeActualizacionDisponible(elemento.getNombre(), elemento.getVersion(), elemento.getTipo());
 
@@ -65,7 +61,7 @@ public class SchedulerService {
                     elemento.setVersion(version);
                 }
             }
-            elementosSingleton.actualizarArchivoElementos(elementos);
+            ElementosSingleton.getInstance().actualizarArchivoElementos(elementos);
         } catch (Exception e) {
             LOG.error("Error general al intentar actualizar los elementos: ", e);
         } finally {
