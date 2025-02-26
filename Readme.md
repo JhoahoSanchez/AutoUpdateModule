@@ -180,45 +180,16 @@ Editar
 
 # Clonar el repositorio
 
-git clone https://github.com/usuario/proyecto.git
+git clone
 cd proyecto
 
 # Instalar dependencias
 
-pip install -r requirements.txt
-Compilación
-Instrucciones para compilar el programa, si aplica:
-
-bash
-Copiar
-Editar
-
-# Ejemplo de compilación para C++
-
-g++ -o programa fuente.cpp
-O para lenguajes interpretados:
-
-bash
-Copiar
-Editar
-
-# Ejecutar directamente el script
-
-python main.py
-Empaquetado
-Instrucciones para empaquetar el programa en un archivo ejecutable o en otro formato:
-
-bash
-Copiar
-Editar
-
-# Crear un paquete distribuible para Python
-
-python setup.py sdist bdist_wheel
+mvn compile
 
 # Crear un ejecutable en Java
 
-jar cf programa.jar ClasePrincipal.class
+mvn clean package
 
 ## Licencia
 
